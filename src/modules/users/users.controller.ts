@@ -35,12 +35,16 @@ export class UsersController {
     }
 
     @Post('login')
+<<<<<<< Updated upstream
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Iniciar sesión', description: 'Autentica al usuario y retorna un JWT' })
     @ApiBody({ type: LoginDto })
     @ApiResponse({ status: 200, description: 'Login exitoso', schema: { example: { accessToken: 'eyJhbGci...' } } })
     @ApiResponse({ status: 401, description: 'Credenciales incorrectas' })
     async loginUser(@Body() user: LoginDto): Promise<string> {
+=======
+    async loginUser(@Body() user: LoginDto): Promise<{access_token:string}> {
+>>>>>>> Stashed changes
         return await this.usersProvider.login(user);
     }
     //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rolId 1 (admin) pueden acceder a esta ruta.
