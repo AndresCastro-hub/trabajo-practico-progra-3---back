@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersRepository } from '../../src/modules/users/users.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../../src/modules/users/entities/user.entity';
-import { Role } from '../../src/modules/auth/roles.enum';
+import { RoleIds } from '../../src/modules/auth/roles.enum';
 
 const mockUser: User = {
   id: 1,
   name: 'Juan',
   email: 'juan@mail.com',
   passwordHashed: 'hashed',
-  rolId: Role.USER,
+  rolId: RoleIds.USER,
   fechaCreacion: new Date(),
 };
 
@@ -49,7 +49,7 @@ describe('UsersRepository', () => {
       name: 'Juan',
       email: 'juan@mail.com',
       passwordHashed: 'hashed',
-      rolId: Role.USER,
+      rolId: RoleIds.USER,
       fechaCreacion: new Date(),
     };
 

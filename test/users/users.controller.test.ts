@@ -1,18 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from '../../src/modules/users/users.controller';
 import { UsersProvider } from '../../src/modules/users/users.provider';
-import { User } from '../../src/modules/users/entities/user.entity';
 import { RegisterDto } from '../../src/modules/users/DTOs/register.dto';
 import { LoginDto } from '../../src/modules/users/DTOs/login.dto';
-import { Role } from '../../src/modules/auth/roles.enum';
+import { RoleNames, RoleIds } from '../../src/modules/auth/roles.enum';
+import { RegisterResponseDto } from '../../src/modules/users/DTOs/registerResponse.dto';
 
-const mockUser: User = {
-  id: 1,
+const mockUser: RegisterResponseDto = {
   name: 'Juan',
   email: 'juan@mail.com',
-  passwordHashed: 'hashed',
-  rolId: Role.USER,
-  fechaCreacion: new Date(),
+  rolName: RoleNames[RoleIds.USER],
 };
 
 const mockUsersProvider = {
@@ -38,7 +35,7 @@ describe('UsersController', () => {
       mockUsersProvider.register.mockResolvedValue(mockUser);
 
       const dto: RegisterDto = { name: 'Juan', email: 'juan@mail.com', password: 'password123' };
-      const result = await controller.createUser(dto);
+      const result: RegisterResponseDto = await controller.createUser(dto);
 
       expect(mockUsersProvider.register).toHaveBeenCalledWith(dto);
       expect(result).toEqual(mockUser);
@@ -47,13 +44,13 @@ describe('UsersController', () => {
 
   describe('loginUser', () => {
     it('debería llamar a login y retornar el token', async () => {
-      mockUsersProvider.login.mockResolvedValue('mock.jwt.token');
+      mockUsersProvider.login.mockResolvedValue({ accessToken: 'mock.jwt.token' });
 
       const dto: LoginDto = { email: 'juan@mail.com', password: 'password123' };
-      const result = await controller.loginUser(dto);
+      const result: { accessToken: string } = await controller.loginUser(dto);
 
       expect(mockUsersProvider.login).toHaveBeenCalledWith(dto);
-      expect(result).toBe('mock.jwt.token');
+      expect(result).toEqual({ accessToken: 'mock.jwt.token' });
     });
   });
 });

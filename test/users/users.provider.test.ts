@@ -6,14 +6,14 @@ import { ConfigService } from '@nestjs/config';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../src/modules/users/entities/user.entity';
-import { Role } from '../../src/modules/auth/roles.enum';
+import { RoleIds, RoleNames } from '../../src/modules/auth/roles.enum';
 
 const mockUser: User = {
   id: 1,
   name: 'Juan',
   email: 'juan@mail.com',
   passwordHashed: '',
-  rolId: Role.USER,
+  rolId: RoleIds.USER,
   fechaCreacion: new Date(),
 };
 
@@ -27,7 +27,7 @@ const mockJwtService = {
 };
 
 const mockConfigService = {
-  get: jest.fn().mockReturnValue('10'),
+  get: jest.fn().mockReturnValue('1'),
 };
 
 describe('UsersProvider', () => {
@@ -49,7 +49,7 @@ describe('UsersProvider', () => {
 
   describe('register', () => {
     it('debería crear un usuario correctamente', async () => {
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const hashedPassword = await bcrypt.hash('password123', 1);
       const mockUserConHash: User = { ...mockUser, passwordHashed: hashedPassword };
       mockUsersRepository.findByEmail.mockResolvedValue(null);
       mockUsersRepository.createUser.mockResolvedValue(mockUserConHash);
@@ -62,8 +62,11 @@ describe('UsersProvider', () => {
 
       expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith('juan@mail.com');
       expect(mockUsersRepository.createUser).toHaveBeenCalled();
-      expect(result.passwordHashed).not.toBe('password123');
-      expect(result.passwordHashed.startsWith('$2b$')).toBe(true);
+      expect(result).toEqual({
+        name: 'Juan',
+        email: 'juan@mail.com',
+        rolName: RoleNames[RoleIds.USER],
+      });
     });
 
     it('debería lanzar ConflictException si el email ya existe', async () => {
@@ -84,11 +87,12 @@ describe('UsersProvider', () => {
 
       const result = await provider.login({ email: 'juan@mail.com', password: 'password123' });
 
-      expect(result).toBe('mock.jwt.token');
+      expect(result).toEqual({ accessToken: 'mock.jwt.token' });
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         id: mockUser.id,
         email: mockUser.email,
         rolId: mockUser.rolId,
+        name: mockUser.name,
       });
     });
 

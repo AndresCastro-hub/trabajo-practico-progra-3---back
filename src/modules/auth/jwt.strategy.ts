@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { RoleIds, RoleNames } from './roles.enum';
 
 export interface JwtPayload {
   id: number;
@@ -25,6 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    return { id: payload.id, email: payload.email, rolId: payload.rolId, name: payload.name };
+    const rolName = RoleNames[payload.rolId as RoleIds] ?? 'desconocido';
+    return { id: payload.id, email: payload.email, rolName: rolName, rolId: payload.rolId, name: payload.name };
   }
 }

@@ -8,7 +8,6 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { User } from './entities/user.entity';
 import { RegisterDto } from './DTOs/register.dto';
 import { UsersProvider } from './users.provider';
 import { LoginDto } from './DTOs/login.dto';
@@ -17,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { RegisterResponseDto } from './DTOs/registerResponse.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -27,24 +27,20 @@ export class UsersController {
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Registrar usuario', description: 'Crea un nuevo usuario con rol de usuario común' })
     @ApiBody({ type: RegisterDto })
-    @ApiResponse({ status: 201, description: 'Usuario creado correctamente', type: User })
+    @ApiResponse({ status: 201, description: 'Usuario creado correctamente', type: RegisterResponseDto })
     @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
     @ApiResponse({ status: 409, description: 'El email ya está en uso' })
-    async createUser(@Body() body: RegisterDto): Promise<User> {
+    async createUser(@Body() body: RegisterDto): Promise<RegisterResponseDto> {
         return await this.usersProvider.register(body);
     }
 
     @Post('login')
-<<<<<<< Updated upstream
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Iniciar sesión', description: 'Autentica al usuario y retorna un JWT' })
     @ApiBody({ type: LoginDto })
     @ApiResponse({ status: 200, description: 'Login exitoso', schema: { example: { accessToken: 'eyJhbGci...' } } })
     @ApiResponse({ status: 401, description: 'Credenciales incorrectas' })
-    async loginUser(@Body() user: LoginDto): Promise<string> {
-=======
-    async loginUser(@Body() user: LoginDto): Promise<{access_token:string}> {
->>>>>>> Stashed changes
+    async loginUser(@Body() user: LoginDto): Promise<{accessToken:string}> {
         return await this.usersProvider.login(user);
     }
     //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rolId 1 (admin) pueden acceder a esta ruta.

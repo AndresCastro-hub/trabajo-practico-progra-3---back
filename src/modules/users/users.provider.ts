@@ -11,7 +11,11 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './DTOs/login.dto';
 import { RegisterDto } from './DTOs/register.dto';
-import { Role } from '../auth/roles.enum';
+import { registerToCreateUserDto } from './mappers/registerToCreateUser.mapper';
+import { userToRegisterResponseDto } from './mappers/userToRegisterResponse.mapper';
+import { RegisterResponseDto } from './DTOs/registerResponse.dto';
+import { RoleNames } from '../auth/roles.enum';
+import { RoleIds } from '../auth/roles.enum';
 
 @Injectable()
 export class UsersProvider {
@@ -21,7 +25,7 @@ export class UsersProvider {
         private readonly configService: ConfigService,
     ) {}
 
-    async register(newUser: RegisterDto): Promise<User> {
+    async register(newUser: RegisterDto): Promise<RegisterResponseDto> {
         const existing = await this.usersRepository.findByEmail(newUser.email);
 
         if (existing) {
@@ -31,17 +35,15 @@ export class UsersProvider {
         const saltRounds: number = parseInt(this.configService.get<string>('BCRYPT_SALT_ROUNDS', '10'));
         const hashedPassword: string = await bcrypt.hash(newUser.password, saltRounds);        
 
-        const createdUser: User = await this.usersRepository.createUser({
-            ...newUser,
-            passwordHashed: hashedPassword,
-            rolId: Role.USER,
-            fechaCreacion: new Date(),
-        });
+        const createdUser: User = await this.usersRepository.createUser(
+            registerToCreateUserDto(newUser, hashedPassword)
+        );
 
-        return createdUser;
+        const rolName = RoleNames[createdUser.rolId as RoleIds] ?? 'desconocido';
+        return userToRegisterResponseDto(createdUser, rolName);
     }
 
-    async login(newLogin: LoginDto): Promise<{access_token: string}> {
+    async login(newLogin: LoginDto): Promise<{accessToken: string}> {
         const user: User | null = await this.usersRepository.findByEmail(newLogin.email);
 
         if (!user) {
@@ -61,7 +63,7 @@ export class UsersProvider {
         const token =  this.jwtService.sign(payload);
 
         return{
-            access_token: token
+            accessToken: token
         }
     }
 }
