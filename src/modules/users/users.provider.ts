@@ -41,7 +41,7 @@ export class UsersProvider {
         return createdUser;
     }
 
-    async login(newLogin: LoginDto): Promise<string> {
+    async login(newLogin: LoginDto): Promise<{access_token: string}> {
         const user: User | null = await this.usersRepository.findByEmail(newLogin.email);
 
         if (!user) {
@@ -56,8 +56,12 @@ export class UsersProvider {
             throw new UnauthorizedException('Contraseña incorrecta');
         }
 
-        const payload: JwtPayload = { id: user.id, email: user.email, rolId: user.rolId };
+        const payload: JwtPayload = { id: user.id, email: user.email, rolId: user.rolId, name: user.name };
 
-        return this.jwtService.sign(payload);
+        const token =  this.jwtService.sign(payload);
+
+        return{
+            access_token: token
+        }
     }
 }
