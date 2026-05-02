@@ -5,6 +5,8 @@ import {
   Get,
   UseGuards,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { RegisterDto } from './DTOs/register.dto';
@@ -14,17 +16,30 @@ import { RoleGuardDto } from '../auth/dtos/role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersProvider: UsersProvider) {}
 
     @Post('register')
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Registrar usuario', description: 'Crea un nuevo usuario con rol de usuario común' })
+    @ApiBody({ type: RegisterDto })
+    @ApiResponse({ status: 201, description: 'Usuario creado correctamente', type: User })
+    @ApiResponse({ status: 400, description: 'Datos de entrada inválidos' })
+    @ApiResponse({ status: 409, description: 'El email ya está en uso' })
     async createUser(@Body() body: RegisterDto): Promise<User> {
         return await this.usersProvider.register(body);
     }
 
     @Post('login')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Iniciar sesión', description: 'Autentica al usuario y retorna un JWT' })
+    @ApiBody({ type: LoginDto })
+    @ApiResponse({ status: 200, description: 'Login exitoso', schema: { example: { accessToken: 'eyJhbGci...' } } })
+    @ApiResponse({ status: 401, description: 'Credenciales incorrectas' })
     async loginUser(@Body() user: LoginDto): Promise<string> {
         return await this.usersProvider.login(user);
     }

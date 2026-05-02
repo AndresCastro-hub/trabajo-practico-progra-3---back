@@ -19,10 +19,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Meal Prep API')
+    .setDescription('API para ofrecer los servicios de usuarios, recetas, planes de comidas y compras')
     .setVersion('1.0')
-    .addTag('cats')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

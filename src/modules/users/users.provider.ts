@@ -11,6 +11,7 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './DTOs/login.dto';
 import { RegisterDto } from './DTOs/register.dto';
+import { Role } from '../auth/roles.enum';
 
 @Injectable()
 export class UsersProvider {
@@ -33,7 +34,7 @@ export class UsersProvider {
         const createdUser: User = await this.usersRepository.createUser({
             ...newUser,
             passwordHashed: hashedPassword,
-            rolId: 2,
+            rolId: Role.USER,
             fechaCreacion: new Date(),
         });
 

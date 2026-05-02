@@ -8,14 +8,6 @@ export class UsersRepository {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
-  
-  async findAll(): Promise<User[]> {
-    return await this.usersRepository.find();
-  }
-
-  async findById(id: number): Promise<User | null> {
-    return await this.usersRepository.findOneBy({ id });
-  }
 
   async findByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findOneBy({ email });
@@ -24,9 +16,5 @@ export class UsersRepository {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.usersRepository.create(createUserDto);
     return await this.usersRepository.save(newUser);
-  }
-
-  async delete(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
   }
 }
