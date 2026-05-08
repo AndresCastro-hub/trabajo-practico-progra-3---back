@@ -14,8 +14,7 @@ import { RegisterDto } from './DTOs/register.dto';
 import { registerToCreateUserDto } from './mappers/registerToCreateUser.mapper';
 import { userToRegisterResponseDto } from './mappers/userToRegisterResponse.mapper';
 import { RegisterResponseDto } from './DTOs/registerResponse.dto';
-import { RoleNames } from '../auth/roles.enum';
-import { RoleIds } from '../auth/roles.enum';
+import { RoleIds, RoleNames } from '../auth/roles.enum';
 
 @Injectable()
 export class UsersProvider {
@@ -58,7 +57,9 @@ export class UsersProvider {
             throw new UnauthorizedException('Contraseña incorrecta');
         }
 
-        const payload: JwtPayload = { id: user.id, email: user.email, rolId: user.rolId, name: user.name };
+        const rolName = RoleNames[user.rolId as RoleIds] ?? 'desconocido';
+
+        const payload: JwtPayload = { id: user.id, email: user.email, rol: rolName, name: user.name };
 
         const token =  this.jwtService.sign(payload);
 

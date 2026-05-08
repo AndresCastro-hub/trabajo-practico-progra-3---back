@@ -7,7 +7,7 @@ export function registerToCreateUserDto(dto: RegisterDto, hashedPassword: string
         name: dto.name,
         email: dto.email,
         passwordHashed: hashedPassword,
-        rolId: RoleIds.ADMIN,
+        rolId: RoleIds.USER,
         fechaCreacion: new Date(),
     };
 }
