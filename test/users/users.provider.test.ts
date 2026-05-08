@@ -91,7 +91,7 @@ describe('UsersProvider', () => {
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         id: mockUser.id,
         email: mockUser.email,
-        rolId: mockUser.rolId,
+        rol: "usuario",
         name: mockUser.name,
       });
     });
