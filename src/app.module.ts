@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from './modules/users/users.module';
+//import { UsersModule } from './modules/users/users.module';
 import { IngredientModule } from './modules/ingredients/ingredients.module';
 
 @Module({
@@ -25,7 +25,7 @@ import { IngredientModule } from './modules/ingredients/ingredients.module';
         autoLoadEntities: true,
       }),
     }),
-    UsersModule,
+    //UsersModule,
     IngredientModule,
   ],
   controllers: [AppController],
