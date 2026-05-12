@@ -1,4 +1,4 @@
-import { Controller, Query } from "@nestjs/common";
+import { Controller, Get, Query } from "@nestjs/common";
 import { Ingredient } from "./entities/ingedients.entity";
 import { IngredientsRepository } from "./ingredients.repository";
 
@@ -7,7 +7,8 @@ import { IngredientsRepository } from "./ingredients.repository";
 export class IngredientController{
     constructor(private readonly ingredientsRepository: IngredientsRepository){}
 
-    public async getIngredientes(@Query('limit') limit: number, @Query('offset') offset: number): Promise <Ingredient[]>{
+    @Get('list')
+    public async getIngredientes(@Query('limit') limit: number = 10, @Query('offset') offset: number = 0): Promise <Ingredient[]>{
         return await this.ingredientsRepository.listarIngredientes(limit, offset)
     }
 }
