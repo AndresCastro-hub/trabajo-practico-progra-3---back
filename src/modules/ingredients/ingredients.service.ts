@@ -1,9 +1,9 @@
 import { InjectRepository } from "@nestjs/typeorm";
-import { Ingredient } from "./entities/ingedients.entity";
+import { Ingredient } from "./entities/ingredients.entity";
 import { Repository } from "typeorm";
 import { createIngredientDto } from "./DTOs/ingredientDto";
 
-export class IngredientsRepository{
+export class IngredientsService{
     constructor(
         @InjectRepository(Ingredient)
         private ingredientrepository: Repository<Ingredient>,
