@@ -8,6 +8,8 @@ import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { IngredientDto } from './DTOs/ingredient.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import type { NutritionService } from '../nutrition/nutrition.interface';
+import { NUTRITION_SERVICE } from '../nutrition/nutrition.interface';
 
 @Injectable()
 export class RecipesService {
@@ -22,19 +24,24 @@ export class RecipesService {
         @InjectRepository(Ingredient)
         private ingredientRepository: Repository<Ingredient>,
 
-        private cloudinaryService: CloudinaryService
+        //Ver como quitar acoplamiento aca
+        private cloudinaryService: CloudinaryService,
+
+        @Inject(NUTRITION_SERVICE)
+        private nutritionService: NutritionService
     ) { }
 
     async create(dto: CreateRecipeDto, userId: number): Promise<RecipeResponseDto> {
         const ingredientes = await this.validateIngredients(dto.ingredientes);
-        const recetaGuardada = await this.saveRecipe(dto, userId);
+        const totalCalorias = await this.calcularCalorias(ingredientes);
+        const recetaGuardada = await this.saveRecipe(dto, userId, totalCalorias);
         await this.saveRecipeIngredients(recetaGuardada, ingredientes);
         return this.findRecipeWithRelations(recetaGuardada.id);
     }
 
     async uploadImage(id: number, imagen: Express.Multer.File): Promise<RecipeResponseDto> {
         if (!imagen) throw new BadRequestException('La imagen es obligatoria');
-        
+
         const receta = await this.recipeRepository.findOne({ where: { id } });
         if (!receta) throw new NotFoundException(`Receta ${id} no encontrada`);
 
@@ -45,6 +52,15 @@ export class RecipesService {
         return this.findRecipeWithRelations(id);
     }
 
+    private async calcularCalorias(ingredientes: { ingrediente: Ingredient; cantidad: number }[]): Promise<number> {
+        const calorias = await Promise.all(
+            ingredientes.map(({ ingrediente, cantidad }) =>
+                this.nutritionService.getCaloriasPorIngrediente(ingrediente.nombre, cantidad, ingrediente.unidad)
+            )
+        );
+        return Math.round(calorias.reduce((sum, cal) => sum + cal, 0));
+    }
+    
     private async validateIngredients(ingredients: IngredientDto[]) {
         return Promise.all(
             ingredients.map(async (i) => {
@@ -55,12 +71,12 @@ export class RecipesService {
         );
     }
 
-    private async saveRecipe(dto: CreateRecipeDto, userId: number) {
+    private async saveRecipe(dto: CreateRecipeDto, userId: number, calorias: number) {
         const receta = this.recipeRepository.create({
             nombre: dto.nombre,
             descripcion: dto.descripcion,
             tiempoPreparacion: dto.tiempoPreparacion,
-            calorias: 0,
+            calorias: calorias,
             imagen_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmlvsBg8t8ThfFQioT_9g_UBDIMdBcbFbG9g&s',
             idUsuario: userId
         })

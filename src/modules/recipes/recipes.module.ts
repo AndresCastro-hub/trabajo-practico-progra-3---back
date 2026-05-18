@@ -6,12 +6,14 @@ import { Recipe } from './entities/recipe.entity';
 import { RecipeIngredient } from './entities/recipe-ingredient.entity';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { FatSecretModule } from '../fatsecret/fatsecret.module';
 
 @Module({
-   imports: [
+  imports: [
+    FatSecretModule,
     CloudinaryModule,
     TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient])],
   controllers: [RecipesController],
   providers: [RecipesService]
 })
-export class RecipesModule {}
+export class RecipesModule { }
