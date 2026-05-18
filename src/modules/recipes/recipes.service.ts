@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Recipe } from './entities/recipe.entity';
 import { Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { IngredientDto } from './DTOs/ingredient.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class RecipesService {
@@ -19,7 +20,9 @@ export class RecipesService {
         private recipeIngredienteRepository: Repository<RecipeIngredient>,
 
         @InjectRepository(Ingredient)
-        private ingredientRepository: Repository<Ingredient>
+        private ingredientRepository: Repository<Ingredient>,
+
+        private cloudinaryService: CloudinaryService
     ) { }
 
     async create(dto: CreateRecipeDto, userId: number): Promise<RecipeResponseDto> {
@@ -27,6 +30,19 @@ export class RecipesService {
         const recetaGuardada = await this.saveRecipe(dto, userId);
         await this.saveRecipeIngredients(recetaGuardada, ingredientes);
         return this.findRecipeWithRelations(recetaGuardada.id);
+    }
+
+    async uploadImage(id: number, imagen: Express.Multer.File): Promise<RecipeResponseDto> {
+        if (!imagen) throw new BadRequestException('La imagen es obligatoria');
+        
+        const receta = await this.recipeRepository.findOne({ where: { id } });
+        if (!receta) throw new NotFoundException(`Receta ${id} no encontrada`);
+
+        const imageUrl = await this.cloudinaryService.uploadImage(imagen);
+        receta.imagen_url = imageUrl;
+        await this.recipeRepository.save(receta);
+
+        return this.findRecipeWithRelations(id);
     }
 
     private async validateIngredients(ingredients: IngredientDto[]) {
@@ -45,7 +61,7 @@ export class RecipesService {
             descripcion: dto.descripcion,
             tiempoPreparacion: dto.tiempoPreparacion,
             calorias: 0,
-            imagen_url: 'harcodeado_test.jpg',
+            imagen_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmlvsBg8t8ThfFQioT_9g_UBDIMdBcbFbG9g&s',
             idUsuario: userId
         })
         return this.recipeRepository.save(receta)

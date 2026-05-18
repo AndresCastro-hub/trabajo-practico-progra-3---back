@@ -1,10 +1,12 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleGuardDto } from '../auth/dtos/role.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @ApiTags('Recipes')
 @Controller('recipes')
@@ -17,7 +19,26 @@ export class RecipesController {
   @ApiResponse({ status: 201, description: 'Receta creada exitosamente' })
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @ApiResponse({ status: 404, description: 'Ingrediente no encontrado' })
-  public async create(@Body() dto: CreateRecipeDto, @Request() req: { user: RoleGuardDto }): Promise<RecipeResponseDto> {
+  public async create(
+    @Body() dto: CreateRecipeDto,
+    @Request() req: { user: RoleGuardDto },
+    @UploadedFile() imagen: Express.Multer.File
+  ): Promise<RecipeResponseDto> {
     return this.recipesService.create(dto, req.user.id);
   }
+
+  @Patch(':id/imagen')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('imagen', { storage: memoryStorage() }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Subir imagen de una receta' })
+  @ApiResponse({ status: 200, description: 'Imagen subida exitosamente' })
+  @ApiResponse({ status: 404, description: 'Receta no encontrada' })
+  public async uploadImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() imagen: Express.Multer.File
+  ): Promise<RecipeResponseDto> {
+    return this.recipesService.uploadImage(id, imagen);
+  }
+
 }

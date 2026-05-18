@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Recipe } from './entities/recipe.entity';
 import { RecipeIngredient } from './entities/recipe-ingredient.entity';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
-import { UsersModule } from '../users/users.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
    imports: [
+    CloudinaryModule,
     TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient])],
   controllers: [RecipesController],
   providers: [RecipesService]
