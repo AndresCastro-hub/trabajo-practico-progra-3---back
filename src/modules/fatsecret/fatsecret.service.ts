@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { NutritionService } from "../nutrition/nutrition.interface";
 import { ConfigService } from "@nestjs/config";
-import * as translations from './transaltions.json'
+import { TRANSLATION_SERVICE } from "../translation/translation.interface";
+import type { ITranslation } from "../translation/translation.interface";
 
 @Injectable()
 export class FatSecretService implements NutritionService {
@@ -9,18 +10,16 @@ export class FatSecretService implements NutritionService {
     private acessToken: string | null = null;
     private tokenExpiry: number = 0;
 
-    constructor(private configService: ConfigService) { }
+    constructor(
+        private configService: ConfigService,
+        @Inject(TRANSLATION_SERVICE)
+        private translationService: ITranslation
+    ) { }
 
     async getCaloriasPorIngrediente(nombreEspanol: string, cantidad: number, unidad: string): Promise<number> {
-        const nombreEnIngles = this.traducir(nombreEspanol)
+        const nombreEnIngles = await this.translationService.traducir(nombreEspanol)
         const foodId = await this.buscarFoodId(nombreEnIngles)
-         return this.obtenerCalorias(foodId, unidad, cantidad);
-    }
-
-    private traducir(nombreEspanol: string): string {
-        const traduccion = (translations as Record<string, string>)[nombreEspanol.toLowerCase()];
-        if (!traduccion) throw new NotFoundException(`No se encontró traducción para: ${nombreEspanol}`);
-        return traduccion;
+        return this.obtenerCalorias(foodId, unidad, cantidad, nombreEspanol);
     }
 
     private async getToken(): Promise<string> {
@@ -64,7 +63,7 @@ export class FatSecretService implements NutritionService {
         return foodId;
     }
 
-    private async obtenerCalorias(foodId: string, unidad: string, cantidad: number): Promise<number> {
+    private async obtenerCalorias(foodId: string, unidad: string, cantidad: number, nombreEspanol: string): Promise<number> {
         const token = await this.getToken();
 
         const response = await fetch(
@@ -85,7 +84,7 @@ export class FatSecretService implements NutritionService {
         const serving100g = servingsArray.find(s =>
             s.metric_serving_unit === 'g' && Number(s.metric_serving_amount) === 100
         );
-        if (!serving100g) throw new NotFoundException(`No se encontraron datos nutricionales para food_id: ${foodId}`);
+        if (!serving100g) throw new NotFoundException(`No se encontraron datos nutricionales para: ${nombreEspanol}`);
         return (Number(serving100g.calories) * cantidad) / 100;
     }
 

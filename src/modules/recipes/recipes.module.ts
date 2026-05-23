@@ -7,13 +7,18 @@ import { RecipeIngredient } from './entities/recipe-ingredient.entity';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { FatSecretModule } from '../fatsecret/fatsecret.module';
+import { RecipeRepository } from './repositories/recipe.repository';
+import { RecipeIngredientRepository } from './repositories/recipe-ingredient.repository';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     FatSecretModule,
     CloudinaryModule,
-    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient])],
+    UsersModule,
+    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient])
+  ],
   controllers: [RecipesController],
-  providers: [RecipesService]
+  providers: [RecipesService, RecipeRepository, RecipeIngredientRepository]
 })
-export class RecipesModule { }
+export class RecipesModule {}
