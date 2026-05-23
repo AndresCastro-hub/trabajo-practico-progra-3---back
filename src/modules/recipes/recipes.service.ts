@@ -12,6 +12,7 @@ import type { NutritionService } from '../nutrition/nutrition.interface';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
 import type { IStorageService } from '../cloudinary/cloudinary.interface';
+import { Recipe } from './entities/recipe.entity';
 
 @Injectable()
 export class RecipesService {
@@ -54,7 +55,7 @@ export class RecipesService {
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
 
-        const totalcount = await this.recipeRepository
+        const totalcount = await this.recipeRepository.useRepository()
         .createQueryBuilder('recipe')
         .getCount()
 
@@ -74,7 +75,7 @@ export class RecipesService {
     }
 
     private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<Recipe[]>{
-        const query = this.recipeRepository
+        const query = this.recipeRepository.useRepository()
             .createQueryBuilder('recipe')
             .where('recipe.idUsuario = :id', {id: userId});
         
@@ -91,7 +92,7 @@ export class RecipesService {
     private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<Recipe[]>{
         const adminId = 1
 
-        const query = this.recipeRepository
+        const query = this.recipeRepository.useRepository()
         .createQueryBuilder('recipe')
         .where('recipe.idUsuario = :id', { id: adminId });
 
@@ -106,7 +107,7 @@ export class RecipesService {
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
-        const recipe = await this.recipeRepository
+        const recipe = await this.recipeRepository.useRepository()
         .createQueryBuilder('recipe')
         .where('recipe.id = :id', {id: recipeId})
         .getOne()

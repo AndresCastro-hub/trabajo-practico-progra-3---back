@@ -40,4 +40,8 @@ export class RecipeRepository {
         if (!receta) throw new NotFoundException(`Receta ${id} no encontrada`);
         return receta;
     }
+
+    public useRepository(): Repository<Recipe>{
+        return this.repository
+    }
 }
