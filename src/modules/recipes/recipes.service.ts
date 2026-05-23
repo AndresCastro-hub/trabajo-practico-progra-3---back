@@ -105,9 +105,8 @@ export class RecipesService {
         return receta;
     }
 
-    async getUserRecipes(page: number, userId: number, recetasPlataforma: boolean): Promise<GetRecipeDto>{
+    async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
-        const adminId = 1;
 
         const totalcount = await this.recipeRepository
         .createQueryBuilder('recipe')
@@ -115,19 +114,9 @@ export class RecipesService {
 
         let recipe: Recipe[] = [];
         if(recetasPlataforma){
-            recipe = await this.recipeRepository
-            .createQueryBuilder('recipe')
-            .where('recipe.idUsuario = :id', {id: adminId})
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
+            recipe = await this.getPlataformRecipes(page, recipesPerPage, name);
         } else{
-            recipe = await this.recipeRepository
-            .createQueryBuilder('recipe')
-            .where('recipe.idUsuario = :id', {id: userId})
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
+            recipe = await this.getUserRecipes(page, recipesPerPage, userId, name);
         }
 
         const getRecipeDto = {
@@ -135,11 +124,39 @@ export class RecipesService {
             totalRecords: totalcount,
             totalPages: totalcount/recipesPerPage
         }
-        /*getRecipeDto.recipeDto = plainToInstance(RecipeDto, recipe);
-        getRecipeDto.totalRecords = totalcount;
-        getRecipeDto.totalPages = totalcount/recipesPerPage;
-        */
         return getRecipeDto
+    }
+
+    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<Recipe[]>{
+        const query = this.recipeRepository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: userId});
+        
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+        }
+
+        return await query
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
+    }
+
+    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<Recipe[]>{
+        const adminId = 1
+
+        const query = this.recipeRepository
+        .createQueryBuilder('recipe')
+        .where('recipe.idUsuario = :id', { id: adminId });
+
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+        }
+
+        return await query
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{

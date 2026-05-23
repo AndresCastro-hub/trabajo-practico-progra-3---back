@@ -48,9 +48,10 @@ export class RecipesController {
   public async getRecipes(
     @Query('page')page: number, 
     @Query('recetasPlataforma')recetasPlataforma: boolean,
+    @Query('nombre')name: string,
     @Request() req: { user: RoleGuardDto }
   ): Promise<GetRecipeDto>{
-    return this.recipesService.getUserRecipes(page, req.user.id, recetasPlataforma)
+    return this.recipesService.getterRecipes(page, req.user.id, recetasPlataforma, name)
   }
 
   @Get()
