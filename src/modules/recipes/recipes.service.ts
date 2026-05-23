@@ -4,6 +4,10 @@ import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { RecipeRepository } from './repositories/recipe.repository';
 import { RecipeIngredientRepository } from './repositories/recipe-ingredient.repository';
 import { NUTRITION_SERVICE } from '../nutrition/nutrition.interface';
+import { GetRecipeDto } from './DTOs/getRecipeDto.dto';
+import { plainToInstance } from 'class-transformer';
+import { RecipeDto } from './DTOs/recipe.dto';
+import { GetRecipeIdDto } from './DTOs/getRecipeId.dto';
 import type { NutritionService } from '../nutrition/nutrition.interface';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
@@ -45,5 +49,68 @@ export class RecipesService {
             )
         );
         return Math.round(calorias.reduce((sum, cal) => sum + cal, 0));
+    }
+    
+    async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
+        const recipesPerPage = 6
+
+        const totalcount = await this.recipeRepository
+        .createQueryBuilder('recipe')
+        .getCount()
+
+        let recipe: Recipe[] = [];
+        if(recetasPlataforma){
+            recipe = await this.getPlataformRecipes(page, recipesPerPage, name);
+        } else{
+            recipe = await this.getUserRecipes(page, recipesPerPage, userId, name);
+        }
+
+        const getRecipeDto = {
+            recipeDto: plainToInstance(RecipeDto, recipe),
+            totalRecords: totalcount,
+            totalPages: totalcount/recipesPerPage
+        }
+        return getRecipeDto
+    }
+
+    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<Recipe[]>{
+        const query = this.recipeRepository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: userId});
+        
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+        }
+
+        return await query
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
+    }
+
+    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<Recipe[]>{
+        const adminId = 1
+
+        const query = this.recipeRepository
+        .createQueryBuilder('recipe')
+        .where('recipe.idUsuario = :id', { id: adminId });
+
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+        }
+
+        return await query
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
+    }
+
+    async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
+        const recipe = await this.recipeRepository
+        .createQueryBuilder('recipe')
+        .where('recipe.id = :id', {id: recipeId})
+        .getOne()
+        
+        return plainToInstance(GetRecipeIdDto, recipe)
     }
 }
