@@ -55,6 +55,9 @@ export class RecipesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener recetas del usuario o de la plataforma paginadas' })
+  @ApiResponse({ status: 200, description: 'Listado de recetas obtenido con éxito.', type: GetRecipeDto })
+  @ApiResponse({ status: 404, description: 'No hay registros de recetas disponibles' })
   public async getRecipes(
     @Query('page')page: number, 
     @Query('recetasPlataforma')recetasPlataforma: boolean,
@@ -64,9 +67,13 @@ export class RecipesController {
     return this.recipesService.getterRecipes(page, req.user.id, recetasPlataforma, name)
   }
 
-  @Get()
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener una receta específica por su ID' })
+  @ApiResponse({ status: 200, description: 'Receta encontrada con éxito.', type: GetRecipeIdDto })
+  @ApiResponse({ status: 404, description: 'La receta con el ID proporcionado no existe.' })
   public async getOneRecipeById(
-    @Query('recipeId')recipeId: number
+    @Param('id', ParseIntPipe)recipeId: number
   ): Promise<GetRecipeIdDto>{
     return this.recipesService.getRecipeById(recipeId)
   }
