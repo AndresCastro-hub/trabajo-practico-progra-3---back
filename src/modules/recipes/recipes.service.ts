@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { RecipeRepository } from './repositories/recipe.repository';
@@ -66,6 +66,10 @@ export class RecipesService {
             recipe = await this.getUserRecipes(page, recipesPerPage, userId, name);
         }
 
+        if (!recipe || recipe.length === 0) {
+            throw new NotFoundException(`No hay registros de recetas disponibles`);
+        }
+
         const getRecipeDto = {
             recipeDto: plainToInstance(RecipeDto, recipe),
             totalRecords: totalcount,
@@ -98,6 +102,9 @@ export class RecipesService {
 
         if(name){
             query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
         }
 
         return await query
@@ -112,6 +119,9 @@ export class RecipesService {
         .where('recipe.id = :id', {id: recipeId})
         .getOne()
         
+        if(!recipe){
+            throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
+        }
         return plainToInstance(GetRecipeIdDto, recipe)
     }
 }
