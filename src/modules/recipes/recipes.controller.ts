@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, Query } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,8 @@ import { RoleGuardDto } from '../auth/dtos/role.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { GetRecipeDto } from './DTOs/getRecipeDto.dto';
+import { GetRecipeIdDto } from './DTOs/getRecipeId.dto';
 
 @ApiTags('Recipes')
 @Controller('recipes')
@@ -41,4 +43,20 @@ export class RecipesController {
     return this.recipesService.uploadImage(id, imagen);
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  public async getRecipes(
+    @Query('page')page: number, 
+    @Query('recetasPlataforma')recetasPlataforma: boolean,
+    @Request() req: { user: RoleGuardDto }
+  ): Promise<GetRecipeDto>{
+    return this.recipesService.getUserRecipes(page, req.user.id, recetasPlataforma)
+  }
+
+  @Get()
+  public async getOneRecipeById(
+    @Query('recipeId')recipeId: number
+  ): Promise<GetRecipeIdDto>{
+    return this.recipesService.getRecipeById(recipeId)
+  }
 }

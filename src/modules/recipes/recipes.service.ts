@@ -10,6 +10,10 @@ import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import type { NutritionService } from '../nutrition/nutrition.interface';
 import { NUTRITION_SERVICE } from '../nutrition/nutrition.interface';
+import { GetRecipeDto } from './DTOs/getRecipeDto.dto';
+import { plainToInstance } from 'class-transformer';
+import { RecipeDto } from './DTOs/recipe.dto';
+import { GetRecipeIdDto } from './DTOs/getRecipeId.dto';
 
 @Injectable()
 export class RecipesService {
@@ -99,5 +103,51 @@ export class RecipesService {
         if (!receta) throw new NotFoundException(`Receta ${id} no encontrada`);
 
         return receta;
+    }
+
+    async getUserRecipes(page: number, userId: number, recetasPlataforma: boolean): Promise<GetRecipeDto>{
+        const recipesPerPage = 6
+        const adminId = 1;
+
+        const totalcount = await this.recipeRepository
+        .createQueryBuilder('recipe')
+        .getCount()
+
+        let recipe: Recipe[] = [];
+        if(recetasPlataforma){
+            recipe = await this.recipeRepository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: adminId})
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
+        } else{
+            recipe = await this.recipeRepository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: userId})
+            .skip(recipesPerPage * page)
+            .take(recipesPerPage)
+            .getMany()
+        }
+
+        const getRecipeDto = {
+            recipeDto: plainToInstance(RecipeDto, recipe),
+            totalRecords: totalcount,
+            totalPages: totalcount/recipesPerPage
+        }
+        /*getRecipeDto.recipeDto = plainToInstance(RecipeDto, recipe);
+        getRecipeDto.totalRecords = totalcount;
+        getRecipeDto.totalPages = totalcount/recipesPerPage;
+        */
+        return getRecipeDto
+    }
+
+    async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
+        const recipe = await this.recipeRepository
+        .createQueryBuilder('recipe')
+        .where('recipe.id = :id', {id: recipeId})
+        .getOne()
+        
+        return plainToInstance(GetRecipeIdDto, recipe)
     }
 }
