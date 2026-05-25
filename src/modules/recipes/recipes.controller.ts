@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, Query } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,8 @@ import { RoleGuardDto } from '../auth/dtos/role.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { GetRecipeDto } from './DTOs/getRecipeDto.dto';
+import { GetRecipeIdDto } from './DTOs/getRecipeId.dto';
 
 @ApiTags('Recipes')
 @Controller('recipes')
@@ -51,4 +53,28 @@ export class RecipesController {
     return this.recipesService.uploadImage(id, imagen);
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener recetas del usuario o de la plataforma paginadas' })
+  @ApiResponse({ status: 200, description: 'Listado de recetas obtenido con éxito.', type: GetRecipeDto })
+  @ApiResponse({ status: 404, description: 'No hay registros de recetas disponibles' })
+  public async getRecipes(
+    @Query('page')page: number, 
+    @Query('recetasPlataforma')recetasPlataforma: boolean,
+    @Query('nombre')name: string,
+    @Request() req: { user: RoleGuardDto }
+  ): Promise<GetRecipeDto>{
+    return this.recipesService.getterRecipes(page, req.user.id, recetasPlataforma, name)
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener una receta específica por su ID' })
+  @ApiResponse({ status: 200, description: 'Receta encontrada con éxito.', type: GetRecipeIdDto })
+  @ApiResponse({ status: 404, description: 'La receta con el ID proporcionado no existe.' })
+  public async getOneRecipeById(
+    @Param('id', ParseIntPipe)recipeId: number
+  ): Promise<GetRecipeIdDto>{
+    return this.recipesService.getRecipeById(recipeId)
+  }
 }
