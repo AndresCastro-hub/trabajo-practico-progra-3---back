@@ -16,6 +16,7 @@ import { userToRegisterResponseDto } from './mappers/userToRegisterResponse.mapp
 import { RegisterResponseDto } from './DTOs/registerResponse.dto';
 import { RoleNames } from '../auth/roles.enum';
 import { RoleIds } from '../auth/roles.enum';
+import { GetUsersDto } from './DTOs/getUsers.dto';
 
 @Injectable()
 export class UsersProvider {
@@ -65,5 +66,9 @@ export class UsersProvider {
         return{
             accessToken: token
         }
+    }
+
+    async getAllFilterByName(page: number, name?: string): Promise<GetUsersDto> {
+        return await this.usersRepository.findByName(page, name);
     }
 }

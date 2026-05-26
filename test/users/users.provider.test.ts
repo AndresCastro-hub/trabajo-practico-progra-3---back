@@ -7,6 +7,7 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../../src/modules/users/entities/user.entity';
 import { RoleIds, RoleNames } from '../../src/modules/auth/roles.enum';
+import { UserInfo } from '../../src/modules/users/DTOs/getUsers.dto';
 
 const mockUser: User = {
   id: 1,
@@ -17,9 +18,17 @@ const mockUser: User = {
   fechaCreacion: new Date(),
 };
 
+const mockUserInfo: UserInfo = {
+  id: 1,
+  name: 'Juan',
+  email: 'juan@mail.com',
+  rolName: RoleNames[RoleIds.USER],
+};
+
 const mockUsersRepository = {
   findByEmail: jest.fn(),
   createUser: jest.fn(),
+  findByName: jest.fn(),
 };
 
 const mockJwtService = {
@@ -112,4 +121,18 @@ describe('UsersProvider', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
   });
+
+  describe('getAllFilterByName', () => {
+    it('debería llamar a findByName del repositorio con los parámetros correctos', async () => {
+      const mockGetUsersDto = { users: [mockUserInfo], totalUsers: 1, totalPages: 1 };
+      mockUsersRepository.findByName.mockResolvedValue(mockGetUsersDto);
+      const page = 1;
+      const name = 'Juan';
+      const result = await provider.getAllFilterByName(page, name);
+
+      expect(mockUsersRepository.findByName).toHaveBeenCalledWith(page, name);
+      expect(result).toEqual(mockGetUsersDto);
+    });
+  });
+  
 });
