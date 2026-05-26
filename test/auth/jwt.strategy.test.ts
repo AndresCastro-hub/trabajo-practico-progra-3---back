@@ -15,9 +15,9 @@ describe('JwtStrategy', () => {
     );
   });
 
-  it('validate debería retornar el payload con id, email y rolId, rolName y name', () => {
+  it('validate debería retornar el payload con id, email , rol y name', () => {
     const strategy = new JwtStrategy(mockConfigService('supersecret'));
-    const result = strategy.validate({ id: 1, email: 'juan@mail.com', rolId: 2, name: 'Juan' });
-    expect(result).toEqual({ id: 1, email: 'juan@mail.com', rolId: 2, rolName: 'usuario', name: 'Juan' });
+    const result = strategy.validate({ id: 1, email: 'juan@mail.com', rol: "usuario", name: 'Juan' });
+    expect(result).toEqual({ id: 1, email: 'juan@mail.com', rol: "usuario", name: 'Juan' });
   });
 });
