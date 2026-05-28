@@ -114,14 +114,10 @@ export class RecipesService {
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
-        const recipe = await this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .where('recipe.id = :id', {id: recipeId})
-        .getOne()
+        return this.recipeRepository.getRecipeById(recipeId)
+    }
+
+    async editRecipe(){
         
-        if(!recipe){
-            throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
-        }
-        return plainToInstance(GetRecipeIdDto, recipe)
     }
 }

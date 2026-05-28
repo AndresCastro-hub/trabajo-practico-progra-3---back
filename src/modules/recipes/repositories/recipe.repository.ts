@@ -6,8 +6,13 @@ import { CreateRecipeDto } from '../DTOs/createRecipe.dto';
 import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
 import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
 import { plainToInstance } from 'class-transformer';
+<<<<<<< Updated upstream
 //import { editRecipeDto } from '../DTOs/editRecipe.dto';
 //import { IngredientDto } from '../DTOs/ingredient.dto';
+=======
+import { editRecipeDto } from '../DTOs/editRecipe.dto';
+import { IngredientDto } from '../DTOs/ingredient.dto';
+>>>>>>> Stashed changes
 import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
 
 
@@ -62,7 +67,10 @@ export class RecipeRepository {
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
         const recipe = await this.repository
         .createQueryBuilder('recipe')
+<<<<<<< Updated upstream
         .leftJoinAndSelect('recipe.ingredientes', 'ingredientes')
+=======
+>>>>>>> Stashed changes
         .where('recipe.id = :id', {id: recipeId})
         .getOne()
             
@@ -72,7 +80,10 @@ export class RecipeRepository {
          return plainToInstance(GetRecipeIdDto, recipe)
     }
 
+<<<<<<< Updated upstream
     /*
+=======
+>>>>>>> Stashed changes
     async edit(editData: editRecipeDto, recipeId: number): Promise<Recipe>{
         const recipeToEdit = await this.repository.findOneBy({
             id: recipeId,
@@ -89,7 +100,11 @@ export class RecipeRepository {
             recipeToEdit.tiempoPreparacion = editData.prepTime
         }
         if(editData.deletedIngredients){
+<<<<<<< Updated upstream
             recipeToEdit.ingredientes.filter((i) => i.id === )
+=======
+            recipeToEdit.ingredientes 
+>>>>>>> Stashed changes
         }
 
     }
@@ -97,5 +112,8 @@ export class RecipeRepository {
     private async deleteRecipeIngredients(deletedIngredients: IngredientDto[]): Promise<void>{
 
     }
+<<<<<<< Updated upstream
     */
+=======
+>>>>>>> Stashed changes
 }
