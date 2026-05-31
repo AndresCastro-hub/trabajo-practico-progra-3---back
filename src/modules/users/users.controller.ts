@@ -7,6 +7,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Query
 } from '@nestjs/common';
 import { RegisterDto } from './DTOs/register.dto';
 import { UsersProvider } from './users.provider';
@@ -17,6 +18,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { RegisterResponseDto } from './DTOs/registerResponse.dto';
+import { GetUsersDto } from './DTOs/getUsers.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -43,7 +45,20 @@ export class UsersController {
     async loginUser(@Body() user: LoginDto): Promise<{accessToken:string}> {
         return await this.usersProvider.login(user);
     }
-    //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rolId 1 (admin) pueden acceder a esta ruta.
+
+    @Get('all')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('administrador')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Obtener usuarios', description: 'Devuelve una lista de usuarios de maneras paginada' })
+    getAllFilterByName(
+        @Query('page')page: number,
+        @Query('nombre')name: string
+    ): Promise<GetUsersDto> {
+        return this.usersProvider.getAllFilterByName(page, name);
+    }
+
+    //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rol 'administrador' pueden acceder a esta ruta.
     @Get('meROLE')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles('administrador')
