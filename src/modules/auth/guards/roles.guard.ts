@@ -8,7 +8,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<number[]>(ROLES_KEY, [
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -17,7 +17,7 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest<{ user: RoleGuardDto }>();
 
-    if (!requiredRoles.includes(user.rolId)) {
+    if (!requiredRoles.includes(user.rol)) {
       throw new ForbiddenException('No tenés permisos para acceder a este recurso');
     }
 
