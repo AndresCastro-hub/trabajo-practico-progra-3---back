@@ -46,7 +46,7 @@ export class UsersController {
     //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rolId 1 (admin) pueden acceder a esta ruta.
     @Get('meROLE')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(1)
+    @Roles('administrador')
     getMeR(@Request() req: { user: RoleGuardDto }): RoleGuardDto {
         return req.user;
     }
