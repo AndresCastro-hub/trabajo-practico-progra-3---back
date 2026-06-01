@@ -65,13 +65,14 @@ export class RecipeRepository {
         const recipe = await this.repository
         .createQueryBuilder('recipe')
         .leftJoinAndSelect('recipe.ingredientes', 'ingredientes')
+        .leftJoinAndSelect('ingredientes.ingrediente', 'detalleIngredientes')
         .where('recipe.id = :id', {id: recipeId})
         .getOne()
             
         if(!recipe){
             throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
         }
-         return plainToInstance(GetRecipeIdDto, recipe)
+        return plainToInstance(GetRecipeIdDto, recipe)
     }
 
     /*

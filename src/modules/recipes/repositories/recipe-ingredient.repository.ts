@@ -19,8 +19,8 @@ export class RecipeIngredientRepository {
     async validateIngredients(ingredients: IngredientDto[]): Promise<{ ingrediente: Ingredient; cantidad: number }[]> {
         return Promise.all(
             ingredients.map(async (i) => {
-                const ingrediente = await this.ingredientRepository.findOne({ where: { id: i.ingredient_id } });
-                if (!ingrediente) throw new NotFoundException(`Ingrediente ${i.ingredient_id} no encontrado`);
+                const ingrediente = await this.ingredientRepository.findOne({ where: { id: i.ingrediente_id } });
+                if (!ingrediente) throw new NotFoundException(`Ingrediente ${i.ingrediente_id} no encontrado`);
                 return { ingrediente, cantidad: i.cantidad };
             })
         );
