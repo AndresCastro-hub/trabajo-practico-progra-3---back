@@ -6,11 +6,8 @@ import { CreateRecipeDto } from '../DTOs/createRecipe.dto';
 import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
 import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
 import { plainToInstance } from 'class-transformer';
-//import { editRecipeDto } from '../DTOs/editRecipe.dto';
-//import { IngredientDto } from '../DTOs/ingredient.dto';
-//import { editRecipeDto } from '../DTOs/editRecipe.dto';
-//import { IngredientDto } from '../DTOs/ingredient.dto';
 import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
+import { editRecipeDto } from '../DTOs/editRecipe.dto';
 
 
 @Injectable()
@@ -75,8 +72,8 @@ export class RecipeRepository {
         return plainToInstance(GetRecipeIdDto, recipe)
     }
 
-    /*
-    async edit(editData: editRecipeDto, recipeId: number): Promise<Recipe>{
+    
+    async edit(editData: editRecipeDto, recipeId: number): Promise<void>{
         const recipeToEdit = await this.repository.findOneBy({
             id: recipeId,
         })
@@ -91,15 +88,7 @@ export class RecipeRepository {
         if(editData.prepTime){
             recipeToEdit.tiempoPreparacion = editData.prepTime
         }
-        if(editData.deletedIngredients){
-            recipeToEdit.ingredientes.filter((i) => i.id === )
-            recipeToEdit.ingredientes 
-        }
-
+        
+        await this.repository.save(recipeToEdit)
     }
-
-    private async deleteRecipeIngredients(deletedIngredients: IngredientDto[]): Promise<void>{
-
-    }
-    */
 }

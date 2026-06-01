@@ -13,6 +13,7 @@ import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
 import type { IStorageService } from '../cloudinary/cloudinary.interface';
 import { Recipe } from './entities/recipe.entity';
+import { editRecipeDto } from './DTOs/editRecipe.dto';
 
 @Injectable()
 export class RecipesService {
@@ -117,7 +118,10 @@ export class RecipesService {
         return this.recipeRepository.getRecipeById(recipeId)
     }
 
-    async editRecipe(){
-        
+    async editRecipe(editData: editRecipeDto, recipeId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.edit(editData, recipeId);
+        await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
+        await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
+        return this.recipeRepository.findWithRelations(recipeId)
     }
 }

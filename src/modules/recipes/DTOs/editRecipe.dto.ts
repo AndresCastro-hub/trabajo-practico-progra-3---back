@@ -10,9 +10,8 @@ export class editRecipeDto{
     prepTime?: number;
 
     @IsArray()
-    @ValidateNested({each: true})
-    @Type(() => IngredientDto)
-    deletedIngredients?: IngredientDto[];
+    @IsNumber({}, { each: true })
+    deletedIngredientsId?: number[];
 
     @IsArray()
     @ValidateNested({each: true})
