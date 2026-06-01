@@ -73,7 +73,7 @@ export class RecipesService {
         const getRecipeDto = {
             recipeDto: plainToInstance(RecipeDto, recipe),
             totalRecords: totalcount,
-            totalPages: totalcount/recipesPerPage
+            totalPages: Math.ceil(totalcount/recipesPerPage)
         }
         return getRecipeDto
     }
