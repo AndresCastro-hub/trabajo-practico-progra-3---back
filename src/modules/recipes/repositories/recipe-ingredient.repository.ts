@@ -6,7 +6,6 @@ import { Ingredient } from '../../ingredients/entities/ingedients.entity';
 import { Recipe } from '../entities/recipe.entity';
 import { IngredientDto } from '../DTOs/ingredient.dto';
 import { editRecipeDto } from '../DTOs/editRecipe.dto';
-import { RecipeRepository } from './recipe.repository';
 
 @Injectable()
 export class RecipeIngredientRepository {
@@ -17,7 +16,7 @@ export class RecipeIngredientRepository {
         @InjectRepository(Ingredient)
         private ingredientRepository: Repository<Ingredient>,
 
-        @InjectRepository(RecipeRepository)
+        @InjectRepository(Recipe)
         private recipeRepository: Repository<Recipe>
     ) {}
 
@@ -41,15 +40,12 @@ export class RecipeIngredientRepository {
     async deleteRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>{
 
         if(editData.deletedIngredientsId){
-            const deletedIngredients = editData.deletedIngredientsId.map((ingredientId) => {
-            return this.repository
-            .createQueryBuilder('recipe')
+            await this.repository
+            .createQueryBuilder()
             .delete()
-            .where("recipe.receta_id = :id", {id: recipeId})
-            .andWhere("recipe.ingrediente_id = :id", {id: ingredientId})
+            .where("receta_id = :recipeId", {recipeId: recipeId})
+            .andWhere("ingrediente_id IN (:...ingredientId)", {ingredientId: editData.deletedIngredientsId})
             .execute()
-        })
-        await Promise.all(deletedIngredients)
         }
     }
 
