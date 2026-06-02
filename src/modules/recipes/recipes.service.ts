@@ -13,6 +13,7 @@ import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
 import type { IStorageService } from '../cloudinary/cloudinary.interface';
 import { Recipe } from './entities/recipe.entity';
+import { editRecipeDto } from './DTOs/editRecipe.dto';
 
 @Injectable()
 export class RecipesService {
@@ -73,7 +74,7 @@ export class RecipesService {
         const getRecipeDto = {
             recipeDto: plainToInstance(RecipeDto, recipe),
             totalRecords: totalcount,
-            totalPages: totalcount/recipesPerPage
+            totalPages: Math.ceil(totalcount/recipesPerPage)
         }
         return getRecipeDto
     }
@@ -114,14 +115,13 @@ export class RecipesService {
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
-        const recipe = await this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .where('recipe.id = :id', {id: recipeId})
-        .getOne()
-        
-        if(!recipe){
-            throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
-        }
-        return plainToInstance(GetRecipeIdDto, recipe)
+        return this.recipeRepository.getRecipeById(recipeId)
+    }
+
+    async editRecipe(editData: editRecipeDto, recipeId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.edit(editData, recipeId);
+        await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
+        await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
+        return this.recipeRepository.findWithRelations(recipeId)
     }
 }

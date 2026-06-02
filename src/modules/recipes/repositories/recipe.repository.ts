@@ -1,16 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Recipe } from '../entities/recipe.entity';
 import { CreateRecipeDto } from '../DTOs/createRecipe.dto';
 import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
+import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
+import { plainToInstance } from 'class-transformer';
+import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
+import { editRecipeDto } from '../DTOs/editRecipe.dto';
 
 
 @Injectable()
 export class RecipeRepository {
     constructor(
         @InjectRepository(Recipe)
-        private repository: Repository<Recipe>
+        private repository: Repository<Recipe>,
+        @InjectRepository(RecipeIngredient)
+        private recipeIngredientRepository: Repository<RecipeIngredient>
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
@@ -43,5 +49,46 @@ export class RecipeRepository {
 
     public useRepository(): Repository<Recipe>{
         return this.repository
+    }
+
+    async validateUser(recipeId: number, userId: number): Promise<void>{
+        const recipe = await this.getRecipeById(recipeId);
+        if(recipe.idUsuario !== userId){
+            throw new BadRequestException(`La receta con id: ${recipeId} no pertenece al usuario con id: ${userId}`);
+        }
+    }
+
+    async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
+        const recipe = await this.repository
+        .createQueryBuilder('recipe')
+        .leftJoinAndSelect('recipe.ingredientes', 'ingredientes')
+        .leftJoinAndSelect('ingredientes.ingrediente', 'detalleIngredientes')
+        .where('recipe.id = :id', {id: recipeId})
+        .getOne()
+            
+        if(!recipe){
+            throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
+        }
+        return plainToInstance(GetRecipeIdDto, recipe)
+    }
+
+    
+    async edit(editData: editRecipeDto, recipeId: number): Promise<void>{
+        const recipeToEdit = await this.repository.findOneBy({
+            id: recipeId,
+        })
+
+        if(!recipeToEdit){
+            throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
+        }
+
+        if(editData.description){
+            recipeToEdit.descripcion = editData.description
+        }
+        if(editData.prepTime){
+            recipeToEdit.tiempoPreparacion = editData.prepTime
+        }
+        
+        await this.repository.save(recipeToEdit)
     }
 }
