@@ -70,7 +70,8 @@ export class RecipesService {
         return this.recipeRepository.getRecipeById(recipeId)
     }
 
-    async editRecipe(editData: editRecipeDto, recipeId: number): Promise<RecipeResponseDto>{
+    async editRecipe(editData: editRecipeDto, recipeId: number, userId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.validateUser(recipeId, userId);
         await this.recipeRepository.edit(editData, recipeId);
         await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
         await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);

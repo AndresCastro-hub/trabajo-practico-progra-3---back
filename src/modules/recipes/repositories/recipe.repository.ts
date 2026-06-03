@@ -108,7 +108,7 @@ export class RecipeRepository {
         if (!recipe || recipe.length === 0) {
             throw new NotFoundException(`No hay registros de recetas disponibles`);
         }
-        
+
         return {
             recipe: recipe,
             totalCount: count
