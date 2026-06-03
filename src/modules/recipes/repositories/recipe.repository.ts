@@ -91,4 +91,75 @@ export class RecipeRepository {
         
         await this.repository.save(recipeToEdit)
     }
+
+    async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const recipesPerPage = 6
+
+        let recipe: Recipe[] = [];
+        let count: number = 0;
+        if(recetasPlataforma){
+            recipe = (await this.getPlataformRecipes(page, recipesPerPage, name)).recipe;
+            count = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
+        } else{
+            recipe = (await this.getUserRecipes(page, recipesPerPage, userId, name)).recipe;
+            count = (await this.getUserRecipes(page, recipesPerPage,userId, name)).totalCount;
+        }
+
+        if (!recipe || recipe.length === 0) {
+            throw new NotFoundException(`No hay registros de recetas disponibles`);
+        }
+        
+        return {
+            recipe: recipe,
+            totalCount: count
+        }
+    }
+
+    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const query = this.repository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: userId});
+        
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
+        }
+
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
+    }
+
+    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const adminId = 1
+
+        const query = this.repository
+        .createQueryBuilder('recipe')
+        .where('recipe.idUsuario = :id', { id: adminId });
+
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
+        }
+        
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
+    }
 }

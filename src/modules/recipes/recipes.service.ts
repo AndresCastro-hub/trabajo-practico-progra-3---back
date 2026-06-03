@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { RecipeRepository } from './repositories/recipe.repository';
@@ -12,7 +12,6 @@ import type { NutritionService } from '../nutrition/nutrition.interface';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
 import type { IStorageService } from '../cloudinary/cloudinary.interface';
-import { Recipe } from './entities/recipe.entity';
 import { editRecipeDto } from './DTOs/editRecipe.dto';
 
 @Injectable()
@@ -56,21 +55,8 @@ export class RecipesService {
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
 
-        
-        let recipe: Recipe[] = [];
-        let totalCount: number = 0;
-
-        if(recetasPlataforma){
-            recipe = (await this.getPlataformRecipes(page, recipesPerPage, name)).recipe;
-            totalCount = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
-        } else{
-            recipe = (await this.getUserRecipes(page, recipesPerPage, userId, name)).recipe;
-            totalCount = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
-        }
-
-        if (!recipe || recipe.length === 0) {
-            throw new NotFoundException(`No hay registros de recetas disponibles`);
-        }
+        const recipe = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name)).recipe;
+        const totalCount = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name)).totalCount;
 
         const getRecipeDto = {
             recipeDto: plainToInstance(RecipeDto, recipe),
@@ -78,54 +64,6 @@ export class RecipesService {
             totalPages: Math.ceil(totalCount/recipesPerPage)
         }
         return getRecipeDto
-    }
-
-    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const query = this.recipeRepository.useRepository()
-            .createQueryBuilder('recipe')
-            .where('recipe.idUsuario = :id', {id: userId});
-        
-        if(name){
-            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
-            if(!query){
-                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
-            }
-        }
-
-        const [recipes, count] = await query
-        .skip(recipesPerPage * page)
-        .take(recipesPerPage)
-        .getManyAndCount()
-        
-        return {
-            recipe: recipes,
-            totalCount: count
-        }
-    }
-
-    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const adminId = 1
-
-        const query = this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .where('recipe.idUsuario = :id', { id: adminId });
-
-        if(name){
-            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
-            if(!query){
-                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
-            }
-        }
-        
-        const [recipes, count] = await query
-        .skip(recipesPerPage * page)
-        .take(recipesPerPage)
-        .getManyAndCount()
-        
-        return {
-            recipe: recipes,
-            totalCount: count
-        }
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
