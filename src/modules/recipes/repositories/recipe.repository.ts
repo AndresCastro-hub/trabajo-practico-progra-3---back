@@ -47,10 +47,6 @@ export class RecipeRepository {
         return receta;
     }
 
-    public useRepository(): Repository<Recipe>{
-        return this.repository
-    }
-
     async validateUser(recipeId: number, userId: number): Promise<void>{
         const recipe = await this.getRecipeById(recipeId);
         if(recipe.idUsuario !== userId){
@@ -161,5 +157,21 @@ export class RecipeRepository {
             recipe: recipes,
             totalCount: count
         }
+    }
+
+    async deleteRecipe(recipeId: number): Promise<RecipeResponseDto>{
+        const recipeToDelete = await this.repository.findOne({
+            where: {
+                id: recipeId,
+            },
+            relations: ['ingredientes', 'ingredientes.ingrediente'],
+        });
+
+        if (!recipeToDelete) throw new NotFoundException(`Receta ${recipeId} no encontrada`);
+        const deletedRecipe = plainToInstance(RecipeResponseDto, recipeToDelete);
+
+        await this.repository.remove(recipeToDelete);
+
+        return deletedRecipe
     }
 }

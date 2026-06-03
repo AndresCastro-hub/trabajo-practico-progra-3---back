@@ -77,4 +77,12 @@ export class RecipesService {
         await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
         return this.recipeRepository.findWithRelations(recipeId)
     }
+
+    async deleteRecipe(recipeId: number, userId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.validateUser(recipeId, userId);
+        await this.recipeIngredientRepository.deleteIngredients(recipeId);
+        const deletedRecipe = await this.recipeRepository.deleteRecipe(recipeId);
+
+        return deletedRecipe
+    }
 }
