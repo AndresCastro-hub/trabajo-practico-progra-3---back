@@ -89,7 +89,7 @@ export class RecipesController {
     return this.recipesService.editRecipe(dto, recipeId, req.user.id)
   }
 
-  @Delete()
+  @Delete(':id/borrar')
   @UseGuards(JwtAuthGuard)
   public async deleteRecipe(
     @Param('id', ParseIntPipe)recipeId: number,
