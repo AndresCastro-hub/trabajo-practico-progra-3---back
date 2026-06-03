@@ -19,7 +19,7 @@ export class IngredientController {
 
     @Post()
     @UseGuards(RolesGuard)
-    @Roles(1)
+    @Roles('administrador')
     public async postIngredientes(@Body() createDto: createIngredientDto): Promise<Ingredient> {
         return await this.ingredientsRepository.crearIngredientes(createDto)
     }

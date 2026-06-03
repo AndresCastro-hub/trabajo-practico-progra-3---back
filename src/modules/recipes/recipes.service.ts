@@ -56,15 +56,16 @@ export class RecipesService {
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
 
-        const totalcount = await this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .getCount()
-
+        
         let recipe: Recipe[] = [];
+        let totalCount: number = 0;
+
         if(recetasPlataforma){
-            recipe = await this.getPlataformRecipes(page, recipesPerPage, name);
+            recipe = (await this.getPlataformRecipes(page, recipesPerPage, name)).recipe;
+            totalCount = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
         } else{
-            recipe = await this.getUserRecipes(page, recipesPerPage, userId, name);
+            recipe = (await this.getUserRecipes(page, recipesPerPage, userId, name)).recipe;
+            totalCount = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
         }
 
         if (!recipe || recipe.length === 0) {
@@ -73,28 +74,36 @@ export class RecipesService {
 
         const getRecipeDto = {
             recipeDto: plainToInstance(RecipeDto, recipe),
-            totalRecords: totalcount,
-            totalPages: Math.ceil(totalcount/recipesPerPage)
+            totalRecords: totalCount,
+            totalPages: Math.ceil(totalCount/recipesPerPage)
         }
         return getRecipeDto
     }
 
-    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<Recipe[]>{
+    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
         const query = this.recipeRepository.useRepository()
             .createQueryBuilder('recipe')
             .where('recipe.idUsuario = :id', {id: userId});
         
         if(name){
             query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
         }
 
-        return await query
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
     }
 
-    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<Recipe[]>{
+    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
         const adminId = 1
 
         const query = this.recipeRepository.useRepository()
@@ -107,11 +116,16 @@ export class RecipesService {
                 throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
             }
         }
-
-        return await query
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
+        
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
