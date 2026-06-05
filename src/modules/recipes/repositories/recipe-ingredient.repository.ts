@@ -65,4 +65,19 @@ export class RecipeIngredientRepository {
             await this.saveAll(recipe, ingredientes)
         }
     }
+
+    async deleteIngredients(recipeId: number): Promise<void>{
+        const recipeToDelete = await this.recipeRepository.findOne({
+            where: {
+                id: recipeId,
+            },
+        });
+
+        if (!recipeToDelete) throw new NotFoundException(`Receta ${recipeId} no encontrada`);
+        await this.repository
+        .createQueryBuilder()
+        .delete()
+        .where("receta_id = :recipeId", {recipeId: recipeId})
+        .execute()
+    }
 }

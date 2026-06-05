@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { RecipeResponseDto } from './DTOs/recipeResponse.dto';
 import { RecipeRepository } from './repositories/recipe.repository';
@@ -12,7 +12,6 @@ import type { NutritionService } from '../nutrition/nutrition.interface';
 import { Ingredient } from '../ingredients/entities/ingedients.entity';
 import {  STORAGE_SERVICE } from '../cloudinary/cloudinary.interface';
 import type { IStorageService } from '../cloudinary/cloudinary.interface';
-import { Recipe } from './entities/recipe.entity';
 import { editRecipeDto } from './DTOs/editRecipe.dto';
 
 @Injectable()
@@ -56,72 +55,33 @@ export class RecipesService {
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
 
-        const totalcount = await this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .getCount()
+        const recipeResponse = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name))
 
-        let recipe: Recipe[] = [];
-        if(recetasPlataforma){
-            recipe = await this.getPlataformRecipes(page, recipesPerPage, name);
-        } else{
-            recipe = await this.getUserRecipes(page, recipesPerPage, userId, name);
-        }
-
-        if (!recipe || recipe.length === 0) {
-            throw new NotFoundException(`No hay registros de recetas disponibles`);
-        }
-
-        const getRecipeDto = {
-            recipeDto: plainToInstance(RecipeDto, recipe),
-            totalRecords: totalcount,
-            totalPages: Math.ceil(totalcount/recipesPerPage)
+        const getRecipeDto: GetRecipeDto = {
+            recipeDto: plainToInstance(RecipeDto, recipeResponse.recipe),
+            totalRecords: recipeResponse.totalCount,
+            totalPages: Math.ceil(recipeResponse.totalCount/recipesPerPage)
         }
         return getRecipeDto
-    }
-
-    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<Recipe[]>{
-        const query = this.recipeRepository.useRepository()
-            .createQueryBuilder('recipe')
-            .where('recipe.idUsuario = :id', {id: userId});
-        
-        if(name){
-            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
-        }
-
-        return await query
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
-    }
-
-    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<Recipe[]>{
-        const adminId = 1
-
-        const query = this.recipeRepository.useRepository()
-        .createQueryBuilder('recipe')
-        .where('recipe.idUsuario = :id', { id: adminId });
-
-        if(name){
-            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
-            if(!query){
-                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
-            }
-        }
-
-        return await query
-            .skip(recipesPerPage * page)
-            .take(recipesPerPage)
-            .getMany()
     }
 
     async getRecipeById(recipeId: number): Promise<GetRecipeIdDto>{
         return this.recipeRepository.getRecipeById(recipeId)
     }
 
-    async editRecipe(editData: editRecipeDto, recipeId: number): Promise<RecipeResponseDto>{
+    async editRecipe(editData: editRecipeDto, recipeId: number, userId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.validateUser(recipeId, userId);
         await this.recipeRepository.edit(editData, recipeId);
         await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
         await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
         return this.recipeRepository.findWithRelations(recipeId)
+    }
+
+    async deleteRecipe(recipeId: number, userId: number): Promise<RecipeResponseDto>{
+        await this.recipeRepository.validateUser(recipeId, userId);
+        await this.recipeIngredientRepository.deleteIngredients(recipeId);
+        const deletedRecipe = await this.recipeRepository.deleteRecipe(recipeId);
+
+        return deletedRecipe
     }
 }

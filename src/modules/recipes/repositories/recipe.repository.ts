@@ -47,10 +47,6 @@ export class RecipeRepository {
         return receta;
     }
 
-    public useRepository(): Repository<Recipe>{
-        return this.repository
-    }
-
     async validateUser(recipeId: number, userId: number): Promise<void>{
         const recipe = await this.getRecipeById(recipeId);
         if(recipe.idUsuario !== userId){
@@ -90,5 +86,87 @@ export class RecipeRepository {
         }
         
         await this.repository.save(recipeToEdit)
+    }
+
+    async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const recipesPerPage = 6
+
+        
+        let recipeResponse: {recipe: Recipe[], totalCount: number}
+        if(recetasPlataforma){
+            recipeResponse = (await this.getPlataformRecipes(page, recipesPerPage, name))
+        } else{
+            recipeResponse = (await this.getUserRecipes(page, recipesPerPage, userId, name))
+        }
+
+        if (!recipeResponse.recipe || recipeResponse.recipe.length === 0) {
+            throw new NotFoundException(`No hay registros de recetas disponibles`);
+        }
+
+        return recipeResponse
+    }
+
+    private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const query = this.repository
+            .createQueryBuilder('recipe')
+            .where('recipe.idUsuario = :id', {id: userId});
+        
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
+        }
+
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
+    }
+
+    private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
+        const adminId = 1
+
+        const query = this.repository
+        .createQueryBuilder('recipe')
+        .where('recipe.idUsuario = :id', { id: adminId });
+
+        if(name){
+            query.andWhere('recipe.nombre ILIKE :nombre', {nombre: `%${name}%`});
+            if(!query){
+                throw new NotFoundException(`No existen recetas que contengan el nombre: ${name}`);
+            }
+        }
+        
+        const [recipes, count] = await query
+        .skip(recipesPerPage * page)
+        .take(recipesPerPage)
+        .getManyAndCount()
+        
+        return {
+            recipe: recipes,
+            totalCount: count
+        }
+    }
+
+    async deleteRecipe(recipeId: number): Promise<RecipeResponseDto>{
+        const recipeToDelete = await this.repository.findOne({
+            where: {
+                id: recipeId,
+            },
+            relations: ['ingredientes', 'ingredientes.ingrediente'],
+        });
+
+        if (!recipeToDelete) throw new NotFoundException(`Receta ${recipeId} no encontrada`);
+        const deletedRecipe = plainToInstance(RecipeResponseDto, recipeToDelete);
+
+        await this.repository.remove(recipeToDelete);
+
+        return deletedRecipe
     }
 }

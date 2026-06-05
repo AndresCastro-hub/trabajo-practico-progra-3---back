@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, Query } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, UploadedFile, UseInterceptors, Patch, Param, ParseIntPipe, Get, Query, Delete } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { CreateRecipeDto } from './DTOs/createRecipe.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -83,8 +83,18 @@ export class RecipesController {
   @UseGuards(JwtAuthGuard)
   public async patchRecipe(
     @Body() dto: editRecipeDto,
-    @Param('id', ParseIntPipe)recipeId: number
+    @Param('id', ParseIntPipe)recipeId: number,
+    @Request() req: { user: RoleGuardDto }
   ): Promise<RecipeResponseDto>{
-    return this.recipesService.editRecipe(dto, recipeId)
+    return this.recipesService.editRecipe(dto, recipeId, req.user.id)
+  }
+
+  @Delete(':id/borrar')
+  @UseGuards(JwtAuthGuard)
+  public async deleteRecipe(
+    @Param('id', ParseIntPipe)recipeId: number,
+    @Request() req: { user: RoleGuardDto }
+  ): Promise<RecipeResponseDto>{
+    return this.recipesService.deleteRecipe(recipeId, req.user.id)
   }
 }
