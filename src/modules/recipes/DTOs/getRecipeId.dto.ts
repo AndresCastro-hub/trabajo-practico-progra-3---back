@@ -1,5 +1,5 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator";
-import { IngredientDto } from "./ingredient.dto";
+import { GetIngredientDto } from "./ingredient.dto";
 import { Type } from "class-transformer";
 
 export class GetRecipeIdDto{
@@ -30,6 +30,6 @@ export class GetRecipeIdDto{
     
     @IsArray()
     @ValidateNested({each: true})
-    @Type(() => IngredientDto)
-    ingredientes!: IngredientDto[]
+    @Type(() => GetIngredientDto)
+    ingredientes!: GetIngredientDto[];
 }

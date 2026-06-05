@@ -9,6 +9,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { GetRecipeDto } from './DTOs/getRecipeDto.dto';
 import { GetRecipeIdDto } from './DTOs/getRecipeId.dto';
+import { editRecipeDto } from './DTOs/editRecipe.dto';
 
 @ApiTags('Recipes')
 @Controller('recipes')
@@ -76,5 +77,14 @@ export class RecipesController {
     @Param('id', ParseIntPipe)recipeId: number
   ): Promise<GetRecipeIdDto>{
     return this.recipesService.getRecipeById(recipeId)
+  }
+
+  @Patch(':id/editar')
+  @UseGuards(JwtAuthGuard)
+  public async patchRecipe(
+    @Body() dto: editRecipeDto,
+    @Param('id', ParseIntPipe)recipeId: number
+  ): Promise<RecipeResponseDto>{
+    return this.recipesService.editRecipe(dto, recipeId)
   }
 }
