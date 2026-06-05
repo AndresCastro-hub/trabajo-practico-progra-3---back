@@ -6,6 +6,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { IngredientResponseDto } from "./DTOs/ingredientResponse.dto";
 
 @Controller('ingredients')
 
@@ -13,8 +14,12 @@ export class IngredientController {
     constructor(private readonly ingredientsRepository: IngredientsRepository) { }
 
     @Get()
-    public async getIngredientes(@Query('limit') limit: number = 10, @Query('offset') offset: number = 0): Promise<Ingredient[]> {
-        return await this.ingredientsRepository.listarIngredientes(limit, offset)
+    @UseGuards(JwtAuthGuard)
+    public async getIngredientes(
+        @Query('page') page: number,
+        @Query('name') name: string
+    ): Promise<IngredientResponseDto> {
+        return await this.ingredientsRepository.listarIngredientes(page, name)
     }
 
     @Post()

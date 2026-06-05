@@ -55,13 +55,12 @@ export class RecipesService {
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
         const recipesPerPage = 6
 
-        const recipe = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name)).recipe;
-        const totalCount = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name)).totalCount;
+        const recipeResponse = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name))
 
-        const getRecipeDto = {
-            recipeDto: plainToInstance(RecipeDto, recipe),
-            totalRecords: totalCount,
-            totalPages: Math.ceil(totalCount/recipesPerPage)
+        const getRecipeDto: GetRecipeDto = {
+            recipeDto: plainToInstance(RecipeDto, recipeResponse.recipe),
+            totalRecords: recipeResponse.totalCount,
+            totalPages: Math.ceil(recipeResponse.totalCount/recipesPerPage)
         }
         return getRecipeDto
     }

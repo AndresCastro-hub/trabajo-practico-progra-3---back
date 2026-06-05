@@ -91,24 +91,19 @@ export class RecipeRepository {
     async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
         const recipesPerPage = 6
 
-        let recipe: Recipe[] = [];
-        let count: number = 0;
+        
+        let recipeResponse: {recipe: Recipe[], totalCount: number}
         if(recetasPlataforma){
-            recipe = (await this.getPlataformRecipes(page, recipesPerPage, name)).recipe;
-            count = (await this.getPlataformRecipes(page, recipesPerPage, name)).totalCount;
+            recipeResponse = (await this.getPlataformRecipes(page, recipesPerPage, name))
         } else{
-            recipe = (await this.getUserRecipes(page, recipesPerPage, userId, name)).recipe;
-            count = (await this.getUserRecipes(page, recipesPerPage,userId, name)).totalCount;
+            recipeResponse = (await this.getUserRecipes(page, recipesPerPage, userId, name))
         }
 
-        if (!recipe || recipe.length === 0) {
+        if (!recipeResponse.recipe || recipeResponse.recipe.length === 0) {
             throw new NotFoundException(`No hay registros de recetas disponibles`);
         }
 
-        return {
-            recipe: recipe,
-            totalCount: count
-        }
+        return recipeResponse
     }
 
     private async getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
