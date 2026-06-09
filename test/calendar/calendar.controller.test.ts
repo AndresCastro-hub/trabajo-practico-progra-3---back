@@ -1,4 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
+
+import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
+import { CalendarController } from "../../src/modules/calendar/calendar.controller";
+import { CalendarService } from "../../src/modules/calendar/calendar.service";
+import { CalendarWeekService } from "../../src/modules/calendar/calendar-week.service";
+import { JwtAuthGuard } from "../../src/modules/auth/guards/jwt-auth.guard";
+import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/create-calendar.dto";
+import { CalendarWeekQueryDto } from "../../src/modules/calendar/DTOs/calendar-week-query.dto";
+import { CalendarWeekItemDto } from "../../src/modules/calendar/DTOs/calendar-week.dto";
 import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
 import { CalendarController } from "../../src/modules/calendar/calendar.controller";
 import { JwtAuthGuard } from "../../src/modules/auth/guards/jwt-auth.guard";
@@ -7,6 +16,10 @@ import { CalendarService } from "../../src/modules/calendar/calendar.service";
 
 const mockCalendarService = {
     assignMeal: jest.fn(),
+};
+
+const mockCalendarWeekService = {
+    getWeekCalendar: jest.fn(),
 };
 
 const mockRequest = {
@@ -21,6 +34,7 @@ describe("CalendarController", () => {
             controllers: [CalendarController],
             providers: [
                 { provide: CalendarService, useValue: mockCalendarService },
+                { provide: CalendarWeekService, useValue: mockCalendarWeekService },
             ],
         })
             .overrideGuard(JwtAuthGuard)
@@ -57,12 +71,13 @@ describe("CalendarController", () => {
             expect(mockCalendarService.assignMeal).toHaveBeenCalledWith(dto, mockRequest.user.id);
         });
 
-        it("debería llamar al service con el usuario del request", async () => {
+        it("debería llamar al service con el id del usuario del request", async () => {
             mockCalendarService.assignMeal.mockResolvedValue(mockCalendar);
 
             await controller.assignMeal(dto, mockRequest as any);
 
             expect(mockCalendarService.assignMeal).toHaveBeenCalledWith(dto, 2);
+            expect(mockCalendarService.assignMeal).toHaveBeenCalledTimes(1);
         });
 
         it("debería propagar NotFoundException si la receta no existe", async () => {
@@ -91,13 +106,65 @@ describe("CalendarController", () => {
             await expect(controller.assignMeal(dto, mockRequest as any))
                 .rejects.toThrow(BadRequestException);
         });
+    });
 
-        it("debería llamar al service exactamente una vez", async () => {
-            mockCalendarService.assignMeal.mockResolvedValue(mockCalendar);
+    describe("getWeekCalendar", () => {
 
-            await controller.assignMeal(dto, mockRequest as any);
+        const query: CalendarWeekQueryDto = { fecha: "2026-06-08" };
 
-            expect(mockCalendarService.assignMeal).toHaveBeenCalledTimes(1);
+        const mockWeek: CalendarWeekItemDto[] = [
+            {
+                fecha: "2026-06-08",
+                tipo_comida: "Almuerzo",
+                titulo: "Milanesa Napolitana",
+                descripcion: "Clásica milanesa napolitana",
+                imagen: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
+                calorias: 850,
+                tiempo_preparacion: 45,
+            },
+            {
+                fecha: "2026-06-08",
+                tipo_comida: "Cena",
+                titulo: "Arroz con Pollo",
+                descripcion: "Arroz cremoso con pollo",
+                imagen: "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
+                calorias: 620,
+                tiempo_preparacion: 50,
+            },
+        ];
+
+        it("debería devolver el calendario de la semana", async () => {
+            mockCalendarWeekService.getWeekCalendar.mockResolvedValue(mockWeek);
+
+            const result = await controller.getWeekCalendar(query, mockRequest as any);
+
+            expect(result).toEqual(mockWeek);
+            expect(mockCalendarWeekService.getWeekCalendar).toHaveBeenCalledWith(query.fecha, mockRequest.user.id);
+        });
+
+        it("debería llamar al service con la fecha y el id del usuario correctos", async () => {
+            mockCalendarWeekService.getWeekCalendar.mockResolvedValue(mockWeek);
+
+            await controller.getWeekCalendar(query, mockRequest as any);
+
+            expect(mockCalendarWeekService.getWeekCalendar).toHaveBeenCalledWith("2026-06-08", 2);
+            expect(mockCalendarWeekService.getWeekCalendar).toHaveBeenCalledTimes(1);
+        });
+
+        it("debería devolver un array vacío si no hay comidas asignadas", async () => {
+            mockCalendarWeekService.getWeekCalendar.mockResolvedValue([]);
+
+            const result = await controller.getWeekCalendar(query, mockRequest as any);
+
+            expect(result).toEqual([]);
+        });
+
+        it("debería devolver múltiples días correctamente", async () => {
+            mockCalendarWeekService.getWeekCalendar.mockResolvedValue(mockWeek);
+
+            const result = await controller.getWeekCalendar(query, mockRequest as any);
+
+            expect(result).toHaveLength(2);
         });
     });
 });
