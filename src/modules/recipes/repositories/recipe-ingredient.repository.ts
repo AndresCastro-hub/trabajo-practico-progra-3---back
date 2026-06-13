@@ -39,7 +39,7 @@ export class RecipeIngredientRepository {
 
     async deleteRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>{
 
-        if(editData.deletedIngredientsId){
+        if(editData.deletedIngredientsId && editData.deletedIngredientsId.length !== 0){
             await this.repository
             .createQueryBuilder()
             .delete()
@@ -51,7 +51,7 @@ export class RecipeIngredientRepository {
 
     async addRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>{
 
-        if(editData.addedIngredients){
+        if(editData.addedIngredients && editData.deletedIngredientsId?.length !== 0){
             const ingredientes = await this.validateIngredients(editData.addedIngredients)
 
             const recipe = await this.recipeRepository
