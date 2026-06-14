@@ -21,4 +21,10 @@ export class editRecipeDto{
     @ValidateNested({each: true})
     @Type(() => IngredientDto)
     addedIngredients?: IngredientDto[];
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({each: true})
+    @Type(() => IngredientDto)
+    updatedIngredients?: IngredientDto[];
 }

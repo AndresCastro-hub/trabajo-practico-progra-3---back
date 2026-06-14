@@ -51,7 +51,7 @@ export class RecipeIngredientRepository {
 
     async addRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>{
 
-        if(editData.addedIngredients && editData.deletedIngredientsId?.length !== 0){
+        if(editData.addedIngredients && editData.addedIngredients.length !== 0){
             const ingredientes = await this.validateIngredients(editData.addedIngredients)
 
             const recipe = await this.recipeRepository
@@ -79,5 +79,37 @@ export class RecipeIngredientRepository {
         .delete()
         .where("receta_id = :recipeId", {recipeId: recipeId})
         .execute()
+    }
+
+    async updateIngredients(editData: editRecipeDto, recipeId: number): Promise<void>{
+        
+        if(editData.updatedIngredients && editData.updatedIngredients.length !== 0){
+            const recipe = await this.recipeRepository.findOne({
+            where: {
+                id: recipeId,
+            },
+            });
+            if (!recipe) throw new NotFoundException(`Receta ${recipeId} no encontrada`);
+
+            for(const i of editData.updatedIngredients ?? []) {
+                const ing = await this.ingredientRepository.findOne({
+                    where: {
+                        id: i.ingrediente_id
+                    }
+                })
+            if(!ing) throw new NotFoundException(`Ingrediente con el id: ${i.ingrediente_id} no encontrada`);
+
+                const recipeUpdate = await this.repository.findOne({
+                    where: {
+                        receta: recipe,
+                        ingrediente: ing
+                 }
+                })
+                if(!recipeUpdate) throw new NotFoundException(`Tabla de recetas con el id: ${i.ingrediente_id} no encontrada`);
+
+                recipeUpdate.cantidad = i.cantidad
+                await this.repository.save(recipeUpdate)
+            }
+        }
     }
 }
