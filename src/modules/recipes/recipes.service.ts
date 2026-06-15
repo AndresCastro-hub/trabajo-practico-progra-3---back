@@ -74,6 +74,7 @@ export class RecipesService {
         await this.recipeRepository.edit(editData, recipeId);
         await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
         await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
+        await this.recipeIngredientRepository.updateIngredients(editData, recipeId);
         return this.recipeRepository.findWithRelations(recipeId)
     }
 
