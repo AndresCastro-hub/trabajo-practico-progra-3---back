@@ -3,6 +3,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from './modules/users/users.module';
+import { IngredientModule } from './modules/ingredients/ingredients.module';
+import { RecipesModule } from './modules/recipes/recipes.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
+import { AppSeederService } from './database/seeds/app-seeder.service';
 
 @Module({
   imports: [
@@ -20,11 +25,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
         synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
-        // entities: [User]
+        autoLoadEntities: true,
       }),
     }),
+    UsersModule,
+    IngredientModule,
+    RecipesModule,
+    CalendarModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppSeederService],
 })
 export class AppModule {}
