@@ -1,5 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Request, Get, Query } from "@nestjs/common";
-import { Controller, Post, Body, UseGuards, Req, Request } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Request, Get, Query } from "@nestjs/common";
 import { CalendarService } from "./calendar.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CreateCalendarDto } from "./DTOs/create-calendar.dto";
@@ -8,7 +7,6 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@ne
 import { CalendarWeekService } from "./calendar-week.service";
 import { CalendarWeekItemDto } from "./DTOs/calendar-week.dto";
 import { CalendarWeekQueryDto } from "./DTOs/calendar-week-query.dto";
-import {  ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Calendar")
 @ApiBearerAuth()

@@ -7,6 +7,7 @@ import { UsersModule } from './modules/users/users.module';
 import { IngredientModule } from './modules/ingredients/ingredients.module';
 import { RecipesModule } from './modules/recipes/recipes.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { AppSeederService } from './database/seeds/app-seeder.service';
 
 @Module({
   imports: [
@@ -33,6 +34,6 @@ import { CalendarModule } from './modules/calendar/calendar.module';
     CalendarModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppSeederService],
 })
 export class AppModule {}
