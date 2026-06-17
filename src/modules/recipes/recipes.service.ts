@@ -75,6 +75,7 @@ export class RecipesService {
         await this.recipeIngredientRepository.deleteRecipeIngredients(editData, recipeId);
         await this.recipeIngredientRepository.addRecipeIngredients(editData, recipeId);
         await this.recipeIngredientRepository.updateIngredients(editData, recipeId);
+        await this.updateCalories(editData, recipeId);
         return this.recipeRepository.findWithRelations(recipeId)
     }
 
@@ -84,5 +85,16 @@ export class RecipesService {
         const deletedRecipe = await this.recipeRepository.deleteRecipe(recipeId);
 
         return deletedRecipe
+    }
+
+    private async updateCalories(dto: editRecipeDto, recipeId: number): Promise<void>{
+        const recipe = await this.recipeRepository.getRecipeEntityById(recipeId)
+        const ingredients = (recipe).ingredientes.map((i) => ({
+            ingrediente: i.ingrediente,
+            cantidad: i.cantidad})
+        )
+        const calories = await this.calcularCalorias(ingredients)
+
+        await this.recipeRepository.updateRecipeCalories(calories, recipe)
     }
 }
