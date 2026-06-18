@@ -40,11 +40,21 @@ export class CalendarController {
     }
 
     @Put()
+    @ApiOperation({ summary: "Editar una receta en un dia y tipo de comida especifico del calendario" })
+    @ApiResponse({ status: 201, description: "Receta editada correctamente." })
+    @ApiResponse({ status: 404, description: "El tipo de comida no existe" })
+    @ApiResponse({ status: 404, description: "La receta no existe." })
+    @ApiResponse({ status: 404, description: "No existen recetas asignadas para este dia del calendario" })
     async editCalendarRecipe(@Body() dto: calendarDto, @Request() req: { user: RoleGuardDto }){
         return this.calendarService.updateCalendarRecipe(dto, req.user.id)
     }
 
     @Delete()
+    @ApiOperation({ summary: "Eliminar la asignacion la una receta a un dia del calendario" })
+    @ApiResponse({ status: 404, description: "La receta no existe." })
+    @ApiResponse({ status: 403, description: "No tenés permiso para asignar esta receta." })
+    @ApiResponse({ status: 404, description: "No existen recetas asignadas para este dia del calendario" })
+    @ApiResponse({status: 200, description: "Receta eliminada", type:[deleteCalendarDto]})
     async deleteCalendarRecipe(@Body() dto: deleteCalendarDto, @Request() req: {user: RoleGuardDto}){
         return this.calendarService.deleteCalendarRecipe(dto, req.user.id)
     }

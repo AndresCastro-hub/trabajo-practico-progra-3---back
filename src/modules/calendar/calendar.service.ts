@@ -97,7 +97,7 @@ export class CalendarService {
         })
 
         if(!calendar){
-            throw new BadRequestException('Este dia de la semana no tiene recetas asignadas')
+            throw new NotFoundException('Este dia de la semana no tiene recetas asignadas')
         }
 
         calendar.receta_id = recipe.id;
