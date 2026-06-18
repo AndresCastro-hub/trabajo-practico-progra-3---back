@@ -13,7 +13,7 @@ export class UsersRepository {
 
   async findByName(page: number, name?: string): Promise<GetUsersDto> {
     const pageSize = 20;
-    const skip = page * pageSize;
+    const skip = page  * pageSize;
 
     const totalcount = await this.usersRepository.createQueryBuilder('user')
     .where(name ? 'user.name ILIKE :name' : '1=1', { name: `%${name}%` })
