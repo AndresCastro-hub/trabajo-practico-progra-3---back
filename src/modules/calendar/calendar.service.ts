@@ -87,7 +87,8 @@ export class CalendarService {
     async updateCalendarRecipe(dto: calendarDto, userId: number): Promise<Calendar>{
         await this.validarTipoComida(dto.tipo_comida_id);
         const recipe = await this.validarReceta(dto)
-        const fecha = new Date(dto.fecha)
+        const [year, month, day] = dto.fecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
         const calendar = await this.calendarRepository.findOne({
             where: {
                 usuario_id: userId,
