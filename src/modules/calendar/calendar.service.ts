@@ -31,7 +31,8 @@ export class CalendarService {
             throw new ForbiddenException("No tenés permiso para asignar esta receta.");
         }
 
-        const fecha = new Date(dto.fecha);
+        const [year, month, day] = dto.fecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
 
         const existente = await this.calendarRepository.findOne({
             where: {
