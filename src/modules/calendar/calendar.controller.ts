@@ -1,12 +1,13 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Query } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Request, Get, Query, Put, Delete } from "@nestjs/common";
 import { CalendarService } from "./calendar.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { CreateCalendarDto } from "./DTOs/create-calendar.dto";
+import { calendarDto } from "./DTOs/calendar.dto";
 import { RoleGuardDto } from "../auth/dtos/role.dto";
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CalendarWeekService } from "./calendar-week.service";
 import { CalendarWeekItemDto } from "./DTOs/calendar-week.dto";
 import { CalendarWeekQueryDto } from "./DTOs/calendar-week-query.dto";
+import { deleteCalendarDto } from "./DTOs/delete-calendar.dto";
 
 @ApiTags("Calendar")
 @ApiBearerAuth()
@@ -26,7 +27,7 @@ export class CalendarController {
     @ApiResponse({ status: 400, description: "Ya existe una receta asignada para ese tipo de comida en ese día." })
     @ApiResponse({ status: 403, description: "No tenés permiso para asignar esta receta." })
     @ApiResponse({ status: 404, description: "La receta no existe." })
-    async assignMeal(@Body() dto: CreateCalendarDto, @Request() req: { user: RoleGuardDto }) {
+    async assignMeal(@Body() dto: calendarDto, @Request() req: { user: RoleGuardDto }) {
         return this.calendarService.assignMeal(dto, req.user.id);
     }
 
@@ -36,5 +37,15 @@ export class CalendarController {
     @ApiResponse({ status: 200, description: "Listado de comidas de la semana.", type: [CalendarWeekItemDto] })
     async getWeekCalendar(@Query() query: CalendarWeekQueryDto, @Request() req: { user: RoleGuardDto }) {
         return this.calendarWeekService.getWeekCalendar(query.fecha, req.user.id);
+    }
+
+    @Put()
+    async editCalendarRecipe(@Body() dto: calendarDto, @Request() req: { user: RoleGuardDto }){
+        return this.calendarService.updateCalendarRecipe(dto, req.user.id)
+    }
+
+    @Delete()
+    async deleteCalendarRecipe(@Body() dto: deleteCalendarDto, @Request() req: {user: RoleGuardDto}){
+        return this.calendarService.deleteCalendarRecipe(dto, req.user.id)
     }
 }
