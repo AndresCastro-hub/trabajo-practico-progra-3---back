@@ -169,4 +169,19 @@ export class RecipeRepository {
 
         return deletedRecipe
     }
+
+    async updateRecipeCalories(totalCalories: number, recipe: Recipe): Promise<void>{
+        recipe.calorias = totalCalories
+        await this.repository.save(recipe)
+    }
+
+    async getRecipeEntityById(recipeId): Promise<Recipe>{
+        const id = recipeId
+        const recipe = await this.repository.findOne({
+            where: { id },
+            relations: ['ingredientes', 'ingredientes.ingrediente'],
+        });
+        if (!recipe) throw new NotFoundException(`Receta ${id} no encontrada`);
+        return recipe
+    }
 }
