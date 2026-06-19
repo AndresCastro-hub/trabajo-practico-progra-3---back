@@ -108,10 +108,12 @@ export class CalendarService {
     }
 
     async deleteCalendarRecipe(dto: deleteCalendarDto, userId: number): Promise<Calendar>{
+        const [year, month, day] = dto.fecha.split("-").map(Number);
+        const date= new Date(year, month - 1, day);
         const calendar = await this.calendarRepository.findOne({
             where: {
                 tipo_comida_id: dto.tipo_comida_id,
-                fecha: new Date(dto.fecha)
+                fecha: date
             }
         })
 
