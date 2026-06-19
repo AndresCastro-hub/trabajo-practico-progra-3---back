@@ -57,23 +57,4 @@ export class UsersController {
     ): Promise<GetUsersDto> {
         return this.usersProvider.getAllFilterByName(page, name);
     }
-
-    //Ruta de prueba para verificar que el guard de roles funciona correctamente. Solo los usuarios con rol 'administrador' pueden acceder a esta ruta.
-    @Get('meROLE')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles('administrador')
-    getMeR(@Request() req: { user: RoleGuardDto }): RoleGuardDto {
-        return req.user;
-    }
-    //Ruta de prueba para verificar que el guard de jwt funciona correctamente. Cualquier usuario autenticado puede acceder a esta ruta.
-    @Get('meJWT')
-    @UseGuards(JwtAuthGuard)
-    getMeJWT(@Request() req: { user: RoleGuardDto }): RoleGuardDto {
-        return req.user;
-    }
-    //Ruta de prueba sin ningún guard para verificar que la autenticación no es necesaria para acceder a esta ruta. Cualquier usuario, autenticado o no, puede acceder a esta ruta.
-    @Get('mefree')
-    getMefree(@Request() req: { user: RoleGuardDto }): RoleGuardDto {
-        return req.user;
-    }
 }
