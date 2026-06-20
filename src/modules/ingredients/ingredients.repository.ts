@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Ingredient } from "./entities/ingedients.entity";
 import { Repository } from "typeorm";
-import { createIngredientDto } from "./DTOs/ingredientDto";
+import { createIngredientDto } from "./DTOs/ingredient.dto";
 import { IngredientResponseDto } from "./DTOs/ingredientResponse.dto";
 import { BadRequestException } from "@nestjs/common";
 
