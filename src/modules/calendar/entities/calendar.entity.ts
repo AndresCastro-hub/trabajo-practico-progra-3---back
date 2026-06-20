@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Recipe } from "../../recipes/entities/recipe.entity";
-import { TipoComida } from "./tipo-comida-entity";
+import { TipoComida } from "./tipo-comida.entity";
 
 @Entity()
 export class Calendar {

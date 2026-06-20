@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Between } from "typeorm";
-import { Calendar } from "../../src/modules/calendar/entities/calendar-entity";
+import { Calendar } from "../../src/modules/calendar/entities/calendar.entity";
 import { CalendarWeekService } from "../../src/modules/calendar/calendar-week.service";
 
 const mockCalendarRepository = {

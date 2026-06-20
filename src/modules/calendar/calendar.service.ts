@@ -1,10 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Calendar } from "./entities/calendar-entity";
+import { Calendar } from "./entities/calendar.entity";
 import { Repository } from "typeorm";
 import { Recipe } from "../recipes/entities/recipe.entity";
 import { calendarDto } from "./DTOs/calendar.dto";
-import { TipoComida } from "./entities/tipo-comida-entity";
+import { TipoComida } from "./entities/tipo-comida.entity";
 import { deleteCalendarDto } from "./DTOs/delete-calendar.dto";
 
 @Injectable()
