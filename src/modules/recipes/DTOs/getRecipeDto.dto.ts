@@ -3,8 +3,8 @@ import { RecipeDto } from "./recipe.dto";
 import { Type } from "class-transformer";
 
 export class GetRecipeDto{
-
-    @IsArray()
+    
+    @IsArray({message: 'lista de recetas'})
     @ValidateNested({each: true})
     @Type(() => RecipeDto)
     recipeDto!: RecipeDto[];
