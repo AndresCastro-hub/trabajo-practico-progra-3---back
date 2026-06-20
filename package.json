@@ -82,6 +82,7 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
+      "/dist/",
       "\\.dto\\.ts$",
       "\\.entity\\.ts$",
       "\\.module\\.ts$"
@@ -90,6 +91,8 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
+      "!**/dist/**",
+      "!**/test/**",
       "**/*.(t|j)s",
       "!**/*.dto.*",
       "!**/*.entity.*",
