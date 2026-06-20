@@ -81,13 +81,19 @@
       "<rootDir>/src"
     ],
     "testPathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "\\.dto\\.ts$",
+      "\\.entity\\.ts$",
+      "\\.module\\.ts$"
     ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.dto.*",
+      "!**/*.entity.*",
+      "!**/*.module.*"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { Ingredient } from "./entities/ingedients.entity";
 import { IngredientsRepository } from "./ingredients.repository";
-import { createIngredientDto } from "./DTOs/ingredientDto";
+import { createIngredientDto } from "./DTOs/ingredient.dto";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
