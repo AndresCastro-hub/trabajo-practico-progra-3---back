@@ -87,6 +87,11 @@
       "\\.entity\\.ts$",
       "\\.module\\.ts$"
     ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/test/"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
@@ -96,6 +101,7 @@
       "**/*.(t|j)s",
       "!**/*.dto.*",
       "!**/*.entity.*",
+      "!**/*.interface.*",
       "!**/*.module.*"
     ],
     "coverageDirectory": "../coverage",
