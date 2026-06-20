@@ -6,7 +6,6 @@ import { CreateRecipeDto } from '../DTOs/createRecipe.dto';
 import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
 import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
 import { plainToInstance } from 'class-transformer';
-import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
 import { editRecipeDto } from '../DTOs/editRecipe.dto';
 
 
@@ -15,8 +14,6 @@ export class RecipeRepository {
     constructor(
         @InjectRepository(Recipe)
         private repository: Repository<Recipe>,
-        @InjectRepository(RecipeIngredient)
-        private recipeIngredientRepository: Repository<RecipeIngredient>
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
