@@ -1,4 +1,4 @@
-INSERT INTO ingredient_translations ("nombreEspanol", "nombreIngles") VALUES
+INSERT INTO ingredient_translation ("nombreEspanol", "nombreIngles") VALUES
 ('pollo', 'Chicken'),
 ('salmón', 'Salmon'),
 ('carne vacuna', 'Beef'),

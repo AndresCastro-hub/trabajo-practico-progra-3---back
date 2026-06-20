@@ -1,6 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-
 import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
 import { CalendarService } from "../../src/modules/calendar/calendar.service";
 import { Calendar } from "../../src/modules/calendar/entities/calendar-entity";
@@ -136,11 +135,15 @@ describe("CalendarService", () => {
 
             await service.assignMeal(dto, 2);
 
+            // Fix: usar el mismo parseo que el service
+            const [year, month, day] = dto.fecha.split("-").map(Number);
+            const fechaEsperada = new Date(year, month - 1, day);
+
             expect(mockCalendarRepository.create).toHaveBeenCalledWith({
                 usuario_id: 2,
                 receta_id: dto.receta_id,
                 tipo_comida_id: dto.tipo_comida_id,
-                fecha: new Date(dto.fecha),
+                fecha: fechaEsperada,
             });
         });
 
