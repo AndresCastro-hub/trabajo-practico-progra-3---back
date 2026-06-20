@@ -81,6 +81,11 @@ export class RecipesController {
 
   @Patch(':id/editar')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Editar una receta' })
+  @ApiResponse({status: 400, description: 'La receta no pertenece al usuario'})
+  @ApiResponse({ status: 404, description: 'La receta con el ID proporcionado no existe.' })
+  @ApiResponse({status: 404, description: 'Id de ingrediente no encontrado'})
+  @ApiResponse({status: 404, description: 'Tabla de recetas no encontrada'})
   public async patchRecipe(
     @Body() dto: editRecipeDto,
     @Param('id', ParseIntPipe)recipeId: number,
@@ -91,6 +96,9 @@ export class RecipesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Eliminar una receta' })
+  @ApiResponse({status: 400, description: 'La receta no pertenece al usuario'})
+   @ApiResponse({ status: 404, description: 'La receta con el ID proporcionado no existe.' })
   public async deleteRecipe(
     @Param('id', ParseIntPipe)recipeId: number,
     @Request() req: { user: RoleGuardDto }

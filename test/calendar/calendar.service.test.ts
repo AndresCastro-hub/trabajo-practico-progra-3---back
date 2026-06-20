@@ -5,7 +5,7 @@ import { CalendarService } from "../../src/modules/calendar/calendar.service";
 import { Calendar } from "../../src/modules/calendar/entities/calendar-entity";
 import { Recipe } from "../../src/modules/recipes/entities/recipe.entity";
 import { TipoComida } from "../../src/modules/calendar/entities/tipo-comida-entity";
-import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/create-calendar.dto";
+import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
 
 const mockCalendarRepository = {
     findOne: jest.fn(),

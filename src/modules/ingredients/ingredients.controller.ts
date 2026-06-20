@@ -23,8 +23,9 @@ export class IngredientController {
     }
 
     @Post()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles("administrador")
+    @UseGuards(RolesGuard)
+    @Roles('administrador')
+    @ApiOperation({summary: 'Crear un ingrediente'})
     public async postIngredientes(@Body() createDto: createIngredientDto): Promise<Ingredient> {
         return await this.ingredientsRepository.crearIngredientes(createDto)
     }

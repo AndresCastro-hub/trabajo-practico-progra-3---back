@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsInt, IsNotEmpty } from "class-validator";
 
-export class CreateCalendarDto {
+export class calendarDto {
 
     @ApiProperty({ example: 1, description: "ID del tipo de comida (ej: 1=Almuerzo, 2=Cena)" })
     @IsInt()
