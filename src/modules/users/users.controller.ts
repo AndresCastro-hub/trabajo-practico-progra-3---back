@@ -4,7 +4,6 @@ import {
   Body,
   Get,
   UseGuards,
-  Request,
   HttpCode,
   HttpStatus,
   Query
@@ -12,7 +11,6 @@ import {
 import { RegisterDto } from './DTOs/register.dto';
 import { UsersProvider } from './users.provider';
 import { LoginDto } from './DTOs/login.dto';
-import { RoleGuardDto } from '../auth/dtos/role.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
