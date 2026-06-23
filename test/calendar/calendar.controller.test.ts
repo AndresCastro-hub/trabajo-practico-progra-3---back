@@ -1,14 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { CalendarWeekService } from "../../src/modules/calendar/calendar-week.service";
-import { JwtAuthGuard } from "../../src/modules/auth/guards/jwt-auth.guard";
-import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
 import { CalendarWeekQueryDto } from "../../src/modules/calendar/DTOs/calendar-week-query.dto";
 import { CalendarWeekItemDto } from "../../src/modules/calendar/DTOs/calendar-week.dto";
 import { BadRequestException, ForbiddenException, NotFoundException } from "@nestjs/common";
 import { CalendarController } from "../../src/modules/calendar/calendar.controller";
 import { JwtAuthGuard } from "../../src/modules/auth/guards/jwt-auth.guard";
-import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
 import { CalendarService } from "../../src/modules/calendar/calendar.service";
+import { calendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
 
 const mockCalendarService = {
     assignMeal: jest.fn(),
@@ -44,7 +42,7 @@ describe("CalendarController", () => {
 
     describe("assignMeal", () => {
 
-        const dto: CreateCalendarDto = {
+        const dto: calendarDto = {
             receta_id: 1,
             tipo_comida_id: 1,
             fecha: "2026-06-08",
