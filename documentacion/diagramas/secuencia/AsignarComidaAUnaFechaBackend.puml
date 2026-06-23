@@ -1,0 +1,72 @@
+@startuml "Asignar Comida A Una Fecha Backend"
+autonumber
+
+participant "Frontend API" as Client
+box "Módulo Recipes" #ffffff
+participant "RecipesController" as RCtrl
+participant "RecipesService" as RSvc
+participant "RecipeRepository" as RRepo
+end box
+
+box "Módulo Calendar" #ffffff
+participant "CalendarController" as CCtrl
+participant "CalendarService" as CSvc
+end box
+
+box "TypeORM & Database" #ffffff
+participant "Repository<Calendar/TipoComida>" as TypeORM
+database "PostgreSQL" as DB
+end box
+
+Client -> RCtrl: GET /recipes?page=0&recetasPlataforma=true
+    RCtrl -> RSvc: getterRecipes(page, userId, recetasPlataforma, name)
+        RSvc -> RRepo: getRecipes(page, userId, recetasPlataforma, name)
+
+            alt recetasPlataforma == true
+                RRepo -> RRepo: getPlataformRecipes(page, recipesPerPage)
+            else
+                RRepo -> RRepo: getUserRecipes(page, recipesPerPage, userId)
+            end
+
+            RRepo -> DB: getManyAndCount()
+            DB --> RRepo: Retorna [recipes: Recipe[], count: number]
+
+        RRepo --> RSvc: Devuelve {recipe, totalCount}
+
+        Note over RSvc: Formatea datos (plainToInstance)\ny calcula totalPages
+    RSvc --> RCtrl: Retorna GetRecipeDto
+RCtrl --> Client: 200 OK (GetRecipeDto JSON)
+
+Client -> CCtrl: POST /calendar {fecha, tipo_comida_id, receta_id}
+    CCtrl -> CSvc: assignMeal(dto, userId)
+
+        CSvc -> CSvc: Validar Tipo de Comida
+        CSvc -> TypeORM: findOne({id: tipo_comida_id})
+            TypeORM -> DB: SELECT * FROM tipo_comida
+                DB --> TypeORM: Retorna TipoComida
+            TypeORM --> CSvc: tipoComida (Si no existe lanza 404)
+
+        CSvc -> CSvc: Validar Receta y Permisos
+        CSvc -> RRepo: findOne({id: receta_id})
+            RRepo -> DB: SELECT * FROM recipe
+                DB --> RRepo: Retorna Recipe
+            RRepo --> CSvc: receta (Si no existe lanza 404)
+
+        Note over CSvc: Verifica si receta es propia\no de plataforma (Sino lanza 403)
+
+        Note over CSvc: Prevenir Duplicados
+        CSvc -> TypeORM: findOne({usuario_id, fecha, tipo_comida_id})
+            TypeORM -> DB: SELECT * FROM calendar
+                DB --> TypeORM: null (Asumiendo que está libre)
+            TypeORM --> CSvc: null (Si existe lanza 400 BadRequest)
+
+        Note over CSvc: Guardar Asignación
+        CSvc -> TypeORM: create({...datos})
+        CSvc -> TypeORM: save(recetaAsignada)
+            TypeORM -> DB: INSERT INTO calendar
+                DB --> TypeORM: Entity guardada
+            TypeORM --> CSvc: Calendar Entity
+
+    CSvc --> CCtrl: Calendar Entity
+CCtrl --> Client: 201 Created (Calendar JSON)
+@enduml

@@ -1,0 +1,38 @@
+@startuml "Asignar Comida A Una Fecha Frontend"
+autonumber
+
+participant "Usuario" as U
+participant "EmptyComidaCard" as EmptyCard
+participant "AsignarRecetaForm" as Form
+participant "SelectorReceta" as Selector
+participant "useAsignarReceta" as Hook
+participant "Servicios API" as ServiciosAPI
+participant "Backend" as Back
+
+U -> EmptyCard: Clic en botón "+ Almuerzo"
+    EmptyCard -> Form: Renderiza Dialog con el formulario
+    Form -> Hook: Llama al hook con (fecha, tipoComida)
+
+        Hook -> ServiciosAPI: obtenerTodasLasRecetas(filters)
+            ServiciosAPI -> Back: GET /recipes?page=0&recetasPlataforma=true
+            Back --> ServiciosAPI: Retorna JSON (IRecetasResponse)
+        ServiciosAPI --> Hook: Devuelve array de recetas
+    Hook --> Form: Actualiza estado (recetas, loading: false)
+
+U -> Selector: Elige una receta
+    Selector -> Hook: setRecetaSeleccionada(IReceta)
+    Hook --> Selector: Actualiza estado local
+Selector --> U: Habilita botón "Confirmar asignación"
+
+U -> Selector: Clic en "Confirmar asignación"
+    Selector -> Hook: Ejecuta handleAsignar()
+        Hook -> ServiciosAPI: asignarRecetaACalendario(AsignarRecetaDTO)
+            ServiciosAPI -> Back: POST /calendar {fecha, tipo_comida_id, receta_id}
+            Back --> ServiciosAPI: 201 Created (CalendarioDTO)
+        ServiciosAPI --> Hook: Confirmación de éxito
+
+        Hook -> Hook: mostrarNotificacion(SUCCESS)
+    Hook -> Form: Ejecuta callback onAsignado()
+    Form --> EmptyCard: Cierra Dialog y ejecuta refrescar()
+EmptyCard --> U: Muestra la nueva receta en la Card
+@enduml
