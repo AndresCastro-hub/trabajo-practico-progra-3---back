@@ -22,7 +22,7 @@ export class Calendar {
     @Column()
     receta_id!: number;
 
-    @ManyToOne(() => Recipe)
+    @ManyToOne(() => Recipe, { onDelete: 'CASCADE' })
     @JoinColumn({ name: "receta_id" })
     receta!: Recipe;
 
