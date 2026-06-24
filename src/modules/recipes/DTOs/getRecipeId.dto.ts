@@ -1,6 +1,6 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator";
 import { GetIngredientDto } from "./ingredient.dto";
-import { Type } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 
 export class GetRecipeIdDto{
     
@@ -32,4 +32,8 @@ export class GetRecipeIdDto{
     @ValidateNested({each: true})
     @Type(() => GetIngredientDto)
     ingredientes!: GetIngredientDto[];
+
+    @Expose()
+    estaAsignada!: boolean
+
 }

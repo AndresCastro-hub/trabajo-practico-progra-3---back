@@ -7,6 +7,7 @@ import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
 import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
 import { plainToInstance } from 'class-transformer';
 import { editRecipeDto } from '../DTOs/editRecipe.dto';
+import { Calendar } from '../../calendar/entities/calendar.entity';
 
 
 @Injectable()
@@ -14,6 +15,8 @@ export class RecipeRepository {
     constructor(
         @InjectRepository(Recipe)
         private repository: Repository<Recipe>,
+           @InjectRepository(Calendar)
+        private calendarRepository: Repository<Calendar>,
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
@@ -62,7 +65,13 @@ export class RecipeRepository {
         if(!recipe){
             throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
         }
-        return plainToInstance(GetRecipeIdDto, recipe)
+
+        const estaAsignada = await this.calendarRepository
+        .createQueryBuilder('calendar')
+        .where('calendar.receta_id = :recipeId', { recipeId })
+        .getCount() > 0
+
+        return plainToInstance(GetRecipeIdDto, { ...recipe, estaAsignada })
     }
 
     
