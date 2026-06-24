@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { Ingredient } from "./entities/ingedients.entity";
 import { IngredientsRepository } from "./ingredients.repository";
-import { createIngredientDto } from "./DTOs/ingredientDto";
+import { createIngredientDto } from "./DTOs/ingredient.dto";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
@@ -25,6 +25,7 @@ export class IngredientController {
     @Post()
     @UseGuards(RolesGuard)
     @Roles('administrador')
+    @ApiOperation({summary: 'Crear un ingrediente'})
     public async postIngredientes(@Body() createDto: createIngredientDto): Promise<Ingredient> {
         return await this.ingredientsRepository.crearIngredientes(createDto)
     }

@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { Ingredient } from "./entities/ingedients.entity";
 import { Repository } from "typeorm";
-import { createIngredientDto } from "./DTOs/ingredientDto";
+import { createIngredientDto } from "./DTOs/ingredient.dto";
 import { IngredientResponseDto } from "./DTOs/ingredientResponse.dto";
 import { BadRequestException } from "@nestjs/common";
 
@@ -12,7 +12,7 @@ export class IngredientsRepository {
     ) { }
 
     public async listarIngredientes(page: number, name?: string): Promise<IngredientResponseDto> {
-        const recipesPerPage = 10
+        const recipesPerPage = Number(process.env.INGREDIENTS_PER_PAGE) || 10
         if(page<1){
             throw new BadRequestException('La pagina tiene que ser mayor o igual a 1');
         }

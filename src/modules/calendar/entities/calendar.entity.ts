@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Recipe } from "../../recipes/entities/recipe.entity";
-import { TipoComida } from "./tipo-comida-entity";
+import { TipoComida } from "./tipo-comida.entity";
 
 @Entity()
 export class Calendar {
@@ -22,7 +22,7 @@ export class Calendar {
     @Column()
     receta_id!: number;
 
-    @ManyToOne(() => Recipe)
+    @ManyToOne(() => Recipe, { onDelete: 'CASCADE' })
     @JoinColumn({ name: "receta_id" })
     receta!: Recipe;
 

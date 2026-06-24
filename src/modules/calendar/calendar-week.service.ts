@@ -1,5 +1,5 @@
 import { InjectRepository } from "@nestjs/typeorm";
-import { Calendar } from "./entities/calendar-entity";
+import { Calendar } from "./entities/calendar.entity";
 import { Between, Repository } from "typeorm";
 import { CalendarWeekItemDto } from "./DTOs/calendar-week.dto";
 import { Injectable } from "@nestjs/common";

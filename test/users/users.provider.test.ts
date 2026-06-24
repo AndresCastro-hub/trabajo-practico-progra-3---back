@@ -15,7 +15,7 @@ const mockUser: User = {
   email: 'juan@mail.com',
   passwordHashed: '',
   rolId: RoleIds.USER,
-  fechaCreacion: new Date(),
+  fechaCreacion: expect.any(Date),
 };
 
 const mockUserInfo: UserInfo = {

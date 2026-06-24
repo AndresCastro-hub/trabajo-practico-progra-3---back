@@ -81,13 +81,32 @@
       "<rootDir>/src"
     ],
     "testPathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "/dist/",
+      "\\.dto\\.ts$",
+      "\\.entity\\.ts$",
+      "\\.module\\.ts$"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/",
+      "/test/"
     ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "!**/dist/**",
+      "!**/test/**",
+      "**/*.(t|j)s",
+      "!**/*.dto.*",
+      "!**/*.entity.*",
+      "!**/*.interface.*",
+      "!**/*.module.*",
+      "!**/main.ts",
+      "!**/seeds.ts",
+      "!**/app-seeder.service.ts",
+      "!**/run.seeds.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

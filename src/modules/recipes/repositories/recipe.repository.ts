@@ -6,8 +6,8 @@ import { CreateRecipeDto } from '../DTOs/createRecipe.dto';
 import { RecipeResponseDto } from '../DTOs/recipeResponse.dto';
 import { GetRecipeIdDto } from '../DTOs/getRecipeId.dto';
 import { plainToInstance } from 'class-transformer';
-import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
 import { editRecipeDto } from '../DTOs/editRecipe.dto';
+import { Calendar } from '../../calendar/entities/calendar.entity';
 
 
 @Injectable()
@@ -15,12 +15,12 @@ export class RecipeRepository {
     constructor(
         @InjectRepository(Recipe)
         private repository: Repository<Recipe>,
-        @InjectRepository(RecipeIngredient)
-        private recipeIngredientRepository: Repository<RecipeIngredient>
+           @InjectRepository(Calendar)
+        private calendarRepository: Repository<Calendar>,
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
-        const receta = this.repository.create({
+        const receta = await this.repository.create({
             nombre: dto.nombre,
             descripcion: dto.descripcion,
             tiempoPreparacion: dto.tiempoPreparacion,
@@ -65,7 +65,13 @@ export class RecipeRepository {
         if(!recipe){
             throw new NotFoundException(`la receta con el id: ${recipeId} no existe`)
         }
-        return plainToInstance(GetRecipeIdDto, recipe)
+
+        const estaAsignada = await this.calendarRepository
+        .createQueryBuilder('calendar')
+        .where('calendar.receta_id = :recipeId', { recipeId })
+        .getCount() > 0
+
+        return plainToInstance(GetRecipeIdDto, { ...recipe, estaAsignada })
     }
 
     
@@ -89,7 +95,7 @@ export class RecipeRepository {
     }
 
     async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const recipesPerPage = 6
+        const recipesPerPage = Number(process.env.RECIPES_PER_PAGE) || 6
 
         
         let recipeResponse: {recipe: Recipe[], totalCount: number}
@@ -130,7 +136,7 @@ export class RecipeRepository {
     }
 
     private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const adminId = 1
+        const adminId = Number(process.env.ADMIN_USER_ID) || 1
 
         const query = this.repository
         .createQueryBuilder('recipe')
@@ -168,5 +174,20 @@ export class RecipeRepository {
         await this.repository.remove(recipeToDelete);
 
         return deletedRecipe
+    }
+
+    async updateRecipeCalories(totalCalories: number, recipe: Recipe): Promise<void>{
+        recipe.calorias = totalCalories
+        await this.repository.save(recipe)
+    }
+
+    async getRecipeEntityById(recipeId): Promise<Recipe>{
+        const id = recipeId
+        const recipe = await this.repository.findOne({
+            where: { id },
+            relations: ['ingredientes', 'ingredientes.ingrediente'],
+        });
+        if (!recipe) throw new NotFoundException(`Receta ${id} no encontrada`);
+        return recipe
     }
 }

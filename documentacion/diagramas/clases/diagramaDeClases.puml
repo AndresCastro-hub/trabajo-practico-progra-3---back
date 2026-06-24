@@ -1,0 +1,447 @@
+@startuml name DiagramaDeClases
+
+title Diagrama de clases TP
+
+class RecipesService{
+    - recipeRepository: RecipeRepository
+    - recipeIngredientRepository: RecipeIngredientRepository
+    - nutritionService: NutritionService
+    - storageService: IStorageService
+
+    + create(dto: CreateRecipeDto, userId: number): Promise<RecipeResponseDto>
+    + uploadImage(id: number, imagen: Express.Multer.File): Promise<RecipeResponseDto>
+    - calcularCalorias(ingredientes: { ingrediente: Ingredient; cantidad: number }[]): Promise<number>
+    + getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>
+    + getRecipeById(recipeId: number): Promise<GetRecipeIdDto>
+    + editRecipe(editData: editRecipeDto, recipeId: number, userId: number): Promise<RecipeResponseDto>
+    + deleteRecipe(recipeId: number, userId: number): Promise<RecipeResponseDto>
+    - updateCalories(dto: editRecipeDto, recipeId: number): Promise<void>
+}
+
+class RecipesController{
+    - recipeService: RecipesService
+
+    + create(dto: CreateRecipeDto, req: { user: RoleGuardDto }): Promise<RecipeResponseDto>
+    + uploadImage(id: number, imagen: File): Promise<RecipeResponseDto>
+    + getRecipes(page: number, recetasPlataforma: boolean, name: boolean, req: { user: RoleGuardDto }): Promise<GetRecipeDto> 
+    + patchRecipe(dto: editRecipeDto, recipeId: number, req: { user: RoleGuardDto }): Promise<RecipeResponseDto>
+    + deleteRecipe(recipeId: number, req: { user: RoleGuardDto }): Promise<RecipeResponseDto>
+}
+
+class RecipeIngredientRepository{
+    - repository: Repository<RecipeIngredient>
+    - ingredientRepository: Repository<Ingredient>
+    - recipeRepository: Repository<Recipe>
+
+    + validateIngredients(ingredients: IngredientDto[]): Promise<{ ingrediente: Ingredient; cantidad: number }[]>
+    + saveAll(receta: Recipe, ingredientes: { ingrediente: Ingredient; cantidad: number }[]): Promise<void>
+    + deleteRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>
+    + addRecipeIngredients(editData: editRecipeDto, recipeId: number): Promise<void>
+    + deleteIngredients(recipeId: number): Promise<void>
+    + updateIngredients(editData: editRecipeDto, recipeId: number): Promise<void>
+}
+
+class RecipeRepository{
+    - repository: Repository<Recipe>
+
+    + save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe>
+    + updateImageUrl(id: number, imageUrl: string): Promise<void>
+    + findWithRelations(id: number): Promise<RecipeResponseDto>
+    + validateUser(recipeId: number, userId: number): Promise<void>
+    + getRecipeById(recipeId: number): Promise<GetRecipeIdDto>
+    + edit(editData: editRecipeDto, recipeId: number): Promise<void>
+    + getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>
+    - getUserRecipes(page: number, recipesPerPage: number, userId: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>
+    - getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>
+    + deleteRecipe(recipeId: number): Promise<RecipeResponseDto>
+    + updateRecipeCalories(totalCalories: number, recipe: Recipe): Promise<void>
+    + getRecipeEntityById(recipeId): Promise<Recipe>
+}
+
+class RecipeIngredient{
+    + id: number
+    + receta: Recipe
+    + ingrediente: Ingredient
+    + cantidad: number
+}
+
+class Recipe{
+    + id: number
+    + nombre: string
+    + descripcion: string
+    + calorias: number
+    + tiempoPreparacion: number
+    + imagen_url: string
+    + idusuario: number
+    + ingredientes: RecipeIngredient[]
+}
+
+class CreateRecipeDto {
+    +nombre: string
+    +descripcion: string
+    +tiempoPreparacion: number
+    +ingredientes: IngredientDto[]
+}
+
+class EditRecipeDto {
+    +description: string
+    +prepTime: number
+    +deletedIngredientsId: number[]
+    +addedIngredients: IngredientDto[]
+    +updatedIngredients: IngredientDto[]
+}
+
+class GetRecipeDto {
+    +recipeDto: RecipeDto[]
+    +totalRecords: number
+    +totalPages: number
+}
+
+class GetRecipeIdDto {
+    +nombre: string
+    +descripcion: string
+    +calorias: number
+    +tiempoPreparacion: number
+    +imagen_url: string
+    +idUsuario: number
+    +ingredientes: GetIngredientDto[]
+}
+
+class IngredientDto {
+    +ingrediente_id: number
+    +cantidad: number
+}
+
+class GetIngredientDto {
+    +ingrediente_id: Ingredient
+    +cantidad: number
+}
+
+class RecipeDto {
+    +id: number
+    +nombre: string
+    +descripcion: string
+    +calorias: number
+    +tiempoPreparacion: number
+    +imagen_url: string
+}
+
+class IngredientResponseDto {
+    +id: number
+    +cantidad: number
+    +ingrediente: Object
+}
+
+class RecipeResponseDto {
+    +id: number
+    +nombre: string
+    +descripcion: string
+    +calorias: number
+    +tiempoPreparacion: number
+    +imagen_url: string
+    +ingredientes: IngredientResponseDto[]
+}
+
+class Ingredient{
+    + id: number
+    + nombre: string
+    + unidad: string
+}
+
+class IngredientRepository{
+    - repository: Repository<Ingredient>
+
+    + listarIngredientes(page: number, name?: string): Promise<IngredientResponseDto>
+    + listarTodos(): Promise<Ingredient[]>
+    + crearIngredientes(createIngredientDto: createIngredientDto): Promise<Ingredient>
+}
+
+class CreateIngredientDto{
+    + nombre: string
+    + unidad: string
+}
+
+class IngredientResponseDto{
+    + ingredients: Ingredient[]
+    + totalRecords: number
+    + totalPages: number
+}
+
+class IngredientController{
+    - ingredientsRepository: ingredientRepository
+
+    + getIngredientes(page: number, name: string): Promise<IngredientResponseDto> 
+    + postIngredientes(createDto: createIngredientDto): Promise<Ingredient>
+    + getAll(): Promise<Ingredient[]>
+}
+
+class Calendar{
+    + id: number
+    + usuario_id: number
+    + usuario: User
+    + fecha: Date
+    + receta_id: number
+    + receta: Recipe
+    + tipo_comida_id: number
+    + tipoComida: TipoComida
+}
+
+class TipoComida{
+    + id: number
+    + nombre: string
+}
+
+class CalendarWeekQueryDto{
+    + fecha: string
+}
+
+class CalendarWeekItemDto{
+    + fecha: string
+    + tipo_comida: string
+    + titulo: string
+    + descripcion: string
+    + imagen: string
+    + caloraias: number
+    + tiempo_preparacion: number
+}
+
+class calendarDto{
+    + fecha: string
+    + tipo_comida: string
+    + receta_id: number
+}
+
+class deleteCalendarDto{
+    + fecha: string
+    + tipo_comida_id: number
+}
+
+class CalendarService{
+    - calendarRepository: Repository<Calendar>
+    - recipeRepository: Repository<Recipe>
+    - tipoComidaRepository: Repository<TipoComida>
+
+    + assignMeal(dto: calendarDto, usuarioId: number): Promise<Calendar>
+    - validarTipoComida(tipoComidaId: number): Promise<TipoComida>
+    - validarReceta(dto: calendarDto): Promise<Recipe>
+    + updateCalendarRecipe(dto: calendarDto, userId: number): Promise<Calendar>
+    + deleteCalendarRecipe(dto: deleteCalendarDto, userId: number): Promise<Calendar>
+}
+
+class CalendarWeekService{
+    - calendarRepository: Repository<Calendar>
+
+    + getWeekCalendar(fechaDeInicio: string, usuario_id: number): Promise<CalendarWeekItemDto[]>
+    - mapToDto(entrada: Calendar): CalendarWeekItemDto
+}
+
+class CalendarController{
+    - calendarService: CalendarService
+    - calendarWeekService: CalendarWeekService
+
+    + assignMeal(dto: calendarDto, req: { user: RoleGuardDto })
+    + getWeekCalendar(query: CalendarWeekQueryDto, req: { user: RoleGuardDto })
+    + editCalendarRecipe(dto: calendarDto, req: { user: RoleGuardDto })
+    + deleteCalendarRecipe(dto: deleteCalendarDto,req: {user: RoleGuardDto})
+}
+
+interface NutritionService{
+    + getCaloriasPorIngrediente(nombre: string, cantidad: number, unidad: string): Promise<number>
+}
+
+class FatSecretService implements NutritionService{
+    - accesToken: string
+    - tokenExpiry: number
+    - configService: ConfigService
+    - translationService: ITranslation
+
+    + getCaloriasPorIngrediente(nombreEspanol: string, cantidad: number, unidad: string): Promise<number>
+    - getToken(): Promise<string>
+    - buscarFoodId(nombreIngles: string): Promise<string>
+    - obtenerCalorias(foodId: string, unidad: string, cantidad: number, nombreEspanol: string): Promise<number>
+}
+
+interface ITranslation{
+    + traducir(nombreEspanol: string) : Promise<string>
+}
+
+class TranslationAdapter implements ITranslation{
+    - translationRepository: Repository<IngredientTranslation>
+
+    + traducir(nombreEspanol: string): Promise<string>
+}
+
+class IngredientTranslation{
+    + id: number
+    + nombreEspanol: string
+    + nombreIngles: string
+}
+
+interface IStorageService{
+    + uploadImage(file: Express.Multer.File): Promise<string>
+}
+
+class CloudinaryService implements IStorageService{
+    - configService: ConfigService
+
+    + uploadImage(file: Express.Multer.File): Promise<string>
+}
+
+class User{
+    + id: number
+    + name: string
+    + email: string
+    + passwordHashed: string
+    + rolId: number
+    + fechaCreacion: Date
+}
+
+class UsersRepository{
+    - usersRepository: Repository<User>
+
+    + findByName(page: number, name?: string): Promise<GetUsersDto>
+    + findByEmail(email: string): Promise<User | null>
+    + createUser(createUserDto: CreateUserDto): Promise<User>
+}
+
+class UsersProvider{
+    - usersRepository: UsersRepository
+    - jwtService: JwtService
+    - configService: ConfigService
+
+    + register(newUser: RegisterDto): Promise<RegisterResponseDto>
+    + login(newLogin: LoginDto): Promise<{accessToken: string}>
+    + getAllFilterByName(page: number, name?: string): Promise<GetUsersDto>
+}
+
+class UserController{
+    - usersProvider: UsersProvider
+
+    + createUser(body: RegisterDto): Promise<RegisterResponseDto>
+    + loginUser(user: LoginDto): Promise<{accessToken:string}>
+    + getAllFilterByName(page: number,name: string): Promise<GetUsersDto>
+}
+
+class CreateUserDto{
+    + name: string
+    + email: string
+    + passwordHashed: string
+    + rolId: number
+    + fechaCreacion: Date
+}
+
+class UserInfo{
+    + id: number
+    + name: string
+    + email: string
+    + relName: string
+}
+
+class GetUsersDto{
+    + users: UserInfo[]
+    + totalusers: number
+    + totalPages: number
+}
+
+class LoginDto{
+    + email: string
+    + password: string
+}
+
+class RegisterDto{
+    + email: string
+    + password: string
+    + name: string
+}
+
+class RegisterResponseDto{
+    + name: string
+    + email: string
+    + rolname: string
+}
+'Relaciones usuarios
+UserController ..> UsersProvider
+UsersProvider ..> UsersRepository
+UsersRepository ..> User
+
+' DTOs usuarios
+LoginDto ..> UserController
+RegisterResponseDto ..> UserController
+GetUsersDto ..> UserController
+RegisterResponseDto ..> UsersProvider
+RegisterDto ..> UsersProvider
+LoginDto ..> UsersProvider
+GetUsersDto ..> UsersProvider
+CreateUserDto ..> UsersRepository
+GetUsersDto ..> UsersRepository
+GetUsersDto *-- UserInfo
+
+' relaciones de Recetas
+Recipe *-- RecipeIngredient
+RecipeIngredient *-- Ingredient
+RecipesController ..> RecipesService
+RecipesService ..> RecipeRepository
+RecipesService ..> RecipeIngredientRepository
+RecipeRepository ..> Recipe
+RecipeIngredientRepository ..> RecipeIngredient
+RecipeIngredientRepository ..> Ingredient
+RecipeIngredientRepository ..> Recipe
+RecipeRepository ..> IStorageService
+
+' DTOs de recetas
+RecipeResponseDto ..> RecipesController
+CreateRecipeDto ..> RecipesController
+EditRecipeDto ..> RecipesController
+GetRecipeDto ..> RecipesController
+CreateRecipeDto *-- IngredientDto
+EditRecipeDto *-- IngredientDto
+GetRecipeDto *-- RecipeDto
+RecipeResponseDto *-- IngredientResponseDto
+RecipeResponseDto ..> RecipesService
+CreateRecipeDto ..> RecipesService
+EditRecipeDto ..> RecipesService
+GetRecipeDto ..> RecipesService
+GetRecipeIdDto ..> RecipesService
+IngredientDto ..> RecipeIngredientRepository
+EditRecipeDto ..> RecipeIngredientRepository
+CreateRecipeDto ..> RecipeRepository
+RecipeResponseDto ..> RecipeRepository
+GetRecipeDto ..> RecipeRepository
+GetRecipeIdDto ..> RecipeRepository
+EditRecipeDto ..> RecipeRepository
+GetRecipeIdDto *-- GetIngredientDto
+
+' Relaciones de ingredientes
+IngredientController ..> IngredientRepository
+IngredientRepository ..> Ingredient
+
+' DTOs de ingredientes
+IngredientResponseDto ..> IngredientRepository
+IngredientResponseDto ..> IngredientController
+CreateIngredientDto ..> IngredientController
+CreateIngredientDto ..> IngredientRepository
+
+' Relaciones de calendario
+CalendarController ..> CalendarService
+CalendarController ..> CalendarWeekService
+CalendarService ..> Calendar
+CalendarService ..> Recipe
+CalendarService ..> TipoComida
+CalendarWeekService ..> Calendar
+Calendar *-- Recipe
+Calendar *-- TipoComida
+Calendar *-- User
+
+' DTOs de calendario
+calendarDto ..> CalendarController
+CalendarWeekQueryDto ..> CalendarController
+deleteCalendarDto ..> CalendarController
+calendarDto ..> CalendarService
+deleteCalendarDto ..> CalendarService
+CalendarWeekItemDto ..> CalendarWeekService
+
+' Relaciones traductor y fatsecret
+IngredientTranslation ..> TranslationAdapter
+RecipesService ..> NutritionService
+NutritionService ..> ITranslation
+@enduml

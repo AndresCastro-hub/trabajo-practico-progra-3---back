@@ -1,0 +1,70 @@
+@startuml "Asignar Comida A Una Fecha Backend"
+autonumber
+
+participant "Frontend" as Client
+box "Módulo Recipes" #ffffff
+participant "RecipesController" as RecipeController
+participant "RecipesService" as RecipeService
+participant "RecipeRepository" as RecipeRepo
+end box
+
+box "Módulo Calendar" #ffffff
+participant "CalendarController" as CalendarController
+participant "CalendarService" as CalendarService
+participant "CalendarRepository" as CalendarRepo
+end box
+
+database "PostgreSQL" as DB
+
+Client -> RecipeController: GET /recipes?page=0&recetasPlataforma=true
+    RecipeController -> RecipeService: getterRecipes(page, userId, recetasPlataforma, name)
+        RecipeService -> RecipeRepo: getRecipes(page, userId, recetasPlataforma, name)
+
+            alt recetasPlataforma == true
+                RecipeRepo -> RecipeRepo: getPlataformRecipes(page, recipesPerPage)
+            else
+                RecipeRepo -> RecipeRepo: getUserRecipes(page, recipesPerPage, userId)
+            end
+
+            RecipeRepo -> DB: getManyAndCount()
+            DB --> RecipeRepo: Retorna [recipes: Recipe[], count: number]
+
+        RecipeRepo --> RecipeService: Devuelve {recipe, totalCount}
+
+        Note over RecipeService: Formatea datos (plainToInstance)\ny calcula totalPages
+    RecipeService --> RecipeController: Retorna GetRecipeDto
+RecipeController --> Client: 200 OK (GetRecipeDto JSON)
+
+Client -> CalendarController: POST /calendar {fecha, tipo_comida_id, receta_id}
+    CalendarController -> CalendarService: assignMeal(dto, userId)
+
+        CalendarService -> CalendarService: Validar Tipo de Comida
+        CalendarService -> RecipeRepo: findOne({id: tipo_comida_id})
+            RecipeRepo -> DB: SELECT * FROM tipo_comida WHERE ...
+                DB --> RecipeRepo: Retorna TipoComida
+            RecipeRepo --> CalendarService: tipoComida (Si no existe lanza 404)
+
+        CalendarService -> CalendarService: Validar Receta y Permisos
+        CalendarService -> RecipeRepo: findOne({id: receta_id})
+            RecipeRepo -> DB: SELECT * FROM recipe WHERE ...
+                DB --> RecipeRepo: Retorna Recipe
+            RecipeRepo --> CalendarService: receta (Si no existe lanza 404)
+
+        Note over CalendarService: Verifica si receta es propia\no de plataforma (Sino lanza 403)
+
+        Note over CalendarService: Prevenir Duplicados:
+        CalendarService -> CalendarRepo: findOne({usuario_id, fecha, tipo_comida_id})
+            CalendarRepo -> DB: SELECT * FROM calendar WHERE ...
+                DB --> CalendarRepo: null (Asumiendo que está libre)
+            CalendarRepo --> CalendarService: null (Si existe lanza 400 BadRequest)
+
+        Note over CalendarService: Guardar Asignación
+        CalendarService -> CalendarRepo: create({...datos})
+        CalendarService -> CalendarRepo: save(recetaAsignada)
+            CalendarRepo -> DB: INSERT INTO calendar ...
+                DB --> CalendarRepo: Entity guardada
+            CalendarRepo --> CalendarService: Calendar Entity
+
+    CalendarService --> CalendarController: Calendar Entity
+CalendarController --> Client: 201 Created (Calendar JSON)
+@enduml

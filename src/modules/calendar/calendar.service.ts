@@ -1,10 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Calendar } from "./entities/calendar-entity";
+import { Calendar } from "./entities/calendar.entity";
 import { Repository } from "typeorm";
 import { Recipe } from "../recipes/entities/recipe.entity";
-import { CreateCalendarDto } from "./DTOs/create-calendar.dto";
-import { TipoComida } from "./entities/tipo-comida-entity";
+import { calendarDto } from "./DTOs/calendar.dto";
+import { TipoComida } from "./entities/tipo-comida.entity";
+import { deleteCalendarDto } from "./DTOs/delete-calendar.dto";
 
 @Injectable()
 export class CalendarService {
@@ -20,7 +21,7 @@ export class CalendarService {
         private readonly tipoComidaRepository: Repository<TipoComida>,
     ) { }
 
-    public async assignMeal(dto: CreateCalendarDto, usuarioId: number): Promise<Calendar> {
+    public async assignMeal(dto: calendarDto, usuarioId: number): Promise<Calendar> {
         await this.validarTipoComida(dto.tipo_comida_id);
         const receta = await this.validarReceta(dto);
 
@@ -72,7 +73,7 @@ export class CalendarService {
         return tipoComida;
     }
 
-    private async validarReceta(dto: CreateCalendarDto): Promise<Recipe> {
+    private async validarReceta(dto: calendarDto): Promise<Recipe> {
         const receta = await this.recipeRepository.findOne({
             where: { id: dto.receta_id },
         });
@@ -82,5 +83,56 @@ export class CalendarService {
         }
 
         return receta;
+    }
+
+    async updateCalendarRecipe(dto: calendarDto, userId: number): Promise<Calendar>{
+        await this.validarTipoComida(dto.tipo_comida_id);
+        const recipe = await this.validarReceta(dto)
+        const [year, month, day] = dto.fecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
+        const calendar = await this.calendarRepository.findOne({
+            where: {
+                usuario_id: userId,
+                fecha,
+                tipo_comida_id: dto.tipo_comida_id
+            }
+        })
+
+        if(!calendar){
+            throw new NotFoundException('Este dia de la semana no tiene recetas asignadas')
+        }
+
+        calendar.receta_id = recipe.id;
+        calendar.receta = recipe
+
+        return this.calendarRepository.save(calendar)
+    }
+
+    async deleteCalendarRecipe(dto: deleteCalendarDto, userId: number): Promise<Calendar>{
+        const [year, month, day] = dto.fecha.split("-").map(Number);
+        const date= new Date(year, month - 1, day);
+        const calendar = await this.calendarRepository.findOne({
+            where: {
+                tipo_comida_id: dto.tipo_comida_id,
+                fecha: date
+            }
+        })
+
+        if(!calendar){throw new NotFoundException(`El calendario que desea eliminar no existe.`);}
+
+        const esPropia = calendar.usuario_id === userId;
+        const esDePlataforma = calendar.usuario_id === 1;
+        if (!esPropia && !esDePlataforma) {
+            throw new ForbiddenException("No tenés permiso para asignar esta receta.");
+        }
+    
+        const recipe = await this.recipeRepository.findOne({
+            where: {
+                id: calendar?.receta_id
+            }
+        })
+        if(!recipe){throw new NotFoundException(`La receta con id ${calendar?.receta_id} no existe.`);}
+
+        return await this.calendarRepository.remove(calendar)
     }
 }

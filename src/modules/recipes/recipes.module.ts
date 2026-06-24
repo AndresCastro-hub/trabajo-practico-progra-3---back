@@ -10,13 +10,14 @@ import { FatSecretModule } from '../fatsecret/fatsecret.module';
 import { RecipeRepository } from './repositories/recipe.repository';
 import { RecipeIngredientRepository } from './repositories/recipe-ingredient.repository';
 import { UsersModule } from '../users/users.module';
+import { Calendar } from '../calendar/entities/calendar.entity';
 
 @Module({
   imports: [
     FatSecretModule,
     CloudinaryModule,
     UsersModule,
-    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient])
+    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient, Calendar])
   ],
   controllers: [RecipesController],
   providers: [RecipesService, RecipeRepository, RecipeIngredientRepository]
