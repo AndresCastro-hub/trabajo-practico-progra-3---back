@@ -12,7 +12,7 @@ export class IngredientsRepository {
     ) { }
 
     public async listarIngredientes(page: number, name?: string): Promise<IngredientResponseDto> {
-        const recipesPerPage = Number(process.env.INGREDIENTS_PER_PAGE)
+        const recipesPerPage = Number(process.env.INGREDIENTS_PER_PAGE) || 10
         if(page<1){
             throw new BadRequestException('La pagina tiene que ser mayor o igual a 1');
         }
