@@ -17,7 +17,7 @@ export class RecipeRepository {
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
-        const receta = this.repository.create({
+        const receta = await this.repository.create({
             nombre: dto.nombre,
             descripcion: dto.descripcion,
             tiempoPreparacion: dto.tiempoPreparacion,
@@ -86,7 +86,7 @@ export class RecipeRepository {
     }
 
     async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const recipesPerPage = 6
+        const recipesPerPage = Number(process.env.RECIPES_PER_PAGE) || 6
 
         
         let recipeResponse: {recipe: Recipe[], totalCount: number}
@@ -127,7 +127,7 @@ export class RecipeRepository {
     }
 
     private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const adminId = 1
+        const adminId = Number(process.env.ADMIN_USER_ID) || 1
 
         const query = this.repository
         .createQueryBuilder('recipe')
