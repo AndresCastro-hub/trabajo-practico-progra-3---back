@@ -5,12 +5,13 @@ import { CalendarService } from "../../src/modules/calendar/calendar.service";
 import { Calendar } from "../../src/modules/calendar/entities/calendar.entity";
 import { Recipe } from "../../src/modules/recipes/entities/recipe.entity";
 import { TipoComida } from "../../src/modules/calendar/entities/tipo-comida.entity";
-import { CreateCalendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
+import { calendarDto } from "../../src/modules/calendar/DTOs/calendar.dto";
 
 const mockCalendarRepository = {
     findOne: jest.fn(),
     create: jest.fn(),
     save: jest.fn(),
+    remove: jest.fn(),
 };
 
 const mockRecipeRepository = {
@@ -39,8 +40,13 @@ describe("CalendarService", () => {
 
     afterEach(() => jest.clearAllMocks());
 
-    const dto: CreateCalendarDto = {
+    const dto: calendarDto = {
         receta_id: 1,
+        tipo_comida_id: 1,
+        fecha: "2026-06-08",
+    };
+
+    const deleteDto = {
         tipo_comida_id: 1,
         fecha: "2026-06-08",
     };
@@ -153,6 +159,102 @@ describe("CalendarService", () => {
             await expect(service.assignMeal(dto, 2)).rejects.toThrow(NotFoundException);
 
             expect(mockCalendarRepository.save).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("updateCalendarRecipe", () => {
+        it("debería actualizar correctamente una receta asignada", async () => {
+            const recipe = {
+                id: 10,
+                idUsuario: 2,
+            };
+
+            const calendar = {
+                ...mockCalendar,
+                receta_id: 1,
+            };
+
+            mockTipoComidaRepository.findOne.mockResolvedValue(mockTipoComida);
+            mockRecipeRepository.findOne.mockResolvedValue(recipe);
+            mockCalendarRepository.findOne.mockResolvedValue(calendar);
+
+            const calendarActualizado = {
+                ...calendar,
+                receta_id: 10,
+                receta: recipe,
+            };
+
+            mockCalendarRepository.save.mockResolvedValue(calendarActualizado);
+
+            const result = await service.updateCalendarRecipe(dto, 2);
+
+            expect(result.receta_id).toBe(10);
+            expect(mockCalendarRepository.save).toHaveBeenCalledTimes(1);
+        });
+
+        it("debería lanzar NotFoundException si el calendario no existe", async () => {
+            mockTipoComidaRepository.findOne.mockResolvedValue(mockTipoComida);
+            mockRecipeRepository.findOne.mockResolvedValue(mockRecetaPropia);
+            mockCalendarRepository.findOne.mockResolvedValue(null);
+
+            await expect(
+                service.updateCalendarRecipe(dto, 2),
+            ).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe("deleteCalendarRecipe", () => {
+        it("debería eliminar correctamente una receta asignada", async () => {
+            mockCalendarRepository.findOne.mockResolvedValue(mockCalendar);
+            mockRecipeRepository.findOne.mockResolvedValue(mockRecetaPropia);
+            mockCalendarRepository.remove.mockResolvedValue(mockCalendar);
+
+            const result = await service.deleteCalendarRecipe(deleteDto, 2);
+
+            expect(result).toEqual(mockCalendar);
+            expect(mockCalendarRepository.remove).toHaveBeenCalledTimes(1);
+        });
+
+        it("debería lanzar NotFoundException si el calendario no existe", async () => {
+            mockCalendarRepository.findOne.mockResolvedValue(null);
+
+            await expect(
+                service.deleteCalendarRecipe(deleteDto, 2),
+            ).rejects.toThrow(NotFoundException);
+        });
+
+        it("debería lanzar ForbiddenException si el calendario pertenece a otro usuario", async () => {
+            mockCalendarRepository.findOne.mockResolvedValue({
+                ...mockCalendar,
+                usuario_id: 99,
+            });
+
+            await expect(
+                service.deleteCalendarRecipe(deleteDto, 2),
+            ).rejects.toThrow(ForbiddenException);
+        });
+
+        it("debería lanzar NotFoundException si la receta asociada no existe", async () => {
+            mockCalendarRepository.findOne.mockResolvedValue(mockCalendar);
+            mockRecipeRepository.findOne.mockResolvedValue(null);
+
+            await expect(
+                service.deleteCalendarRecipe(deleteDto, 2),
+            ).rejects.toThrow(NotFoundException);
+        });
+
+        it("debería permitir eliminar recetas de plataforma", async () => {
+            mockCalendarRepository.findOne.mockResolvedValue({
+                ...mockCalendar,
+                usuario_id: 1,
+            });
+
+            mockRecipeRepository.findOne.mockResolvedValue(mockRecetaPlataforma);
+            mockCalendarRepository.remove.mockResolvedValue(mockCalendar);
+
+            await service.deleteCalendarRecipe(deleteDto, 2);
+
+            expect(mockCalendarRepository.remove).toHaveBeenCalledTimes(1);
         });
     });
 });
