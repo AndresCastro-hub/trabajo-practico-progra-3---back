@@ -53,7 +53,7 @@ export class RecipesService {
     }
     
     async getterRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<GetRecipeDto>{
-        const recipesPerPage = 6
+        const recipesPerPage = Number(process.env.RECIPES_PER_PAGE)
 
         const recipeResponse = (await this.recipeRepository.getRecipes(page, userId, recetasPlataforma, name))
 
