@@ -102,7 +102,11 @@
       "!**/*.dto.*",
       "!**/*.entity.*",
       "!**/*.interface.*",
-      "!**/*.module.*"
+      "!**/*.module.*",
+      "!**/main.ts",
+      "!**/seeds.ts",
+      "!**/app-seeder.service.ts",
+      "!**/run.seeds.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
