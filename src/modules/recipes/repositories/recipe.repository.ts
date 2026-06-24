@@ -86,7 +86,7 @@ export class RecipeRepository {
     }
 
     async getRecipes(page: number, userId: number, recetasPlataforma: boolean, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const recipesPerPage = Number(process.env.RECIPES_PER_PAGE)
+        const recipesPerPage = Number(process.env.RECIPES_PER_PAGE) || 6
 
         
         let recipeResponse: {recipe: Recipe[], totalCount: number}
@@ -127,7 +127,7 @@ export class RecipeRepository {
     }
 
     private async getPlataformRecipes(page: number, recipesPerPage: number, name?: string): Promise<{recipe:Recipe[], totalCount: number}>{
-        const adminId = Number(process.env.ADMIN_USER_ID)
+        const adminId = Number(process.env.ADMIN_USER_ID) || 1
 
         const query = this.repository
         .createQueryBuilder('recipe')
