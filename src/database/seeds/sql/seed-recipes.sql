@@ -3,16 +3,16 @@
 -- idUsuario = 1 (admin)
 
 INSERT INTO recipe ("nombre", "descripcion", "calorias", "tiempoPreparacion", "imagen_url", "idUsuario") VALUES
-('Milanesa Napolitana', 'Clásica milanesa de carne rebozada con salsa de tomate, jamón y mozzarella gratinada', 850, 45, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Arroz con Pollo', 'Arroz cremoso cocinado con trozos de pollo, morrón y caldo casero', 620, 50, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Fideos a la Bolognesa', 'Spaghetti con salsa bolognesa de carne picada y tomates frescos', 680, 40, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Locro', 'Guiso tradicional argentino con carne de cerdo, chorizo y porotos blancos', 920, 180, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Pollo al Horno con Papas', 'Muslos de pollo jugosos al horno con papas doradas y hierbas', 700, 75, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Osobuco al Vino Tinto', 'Osobuco braseado lentamente con vino tinto, cebolla y zanahorias', 780, 150, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Guiso de Lentejas', 'Guiso reconfortante de lentejas con chorizo, cebolla y pimentón', 540, 60, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Tortilla de Papa', 'Tortilla española con papas y cebolla, jugosa por dentro y dorada por fuera', 480, 35, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Pasta Carbonara', 'Penne con salsa cremosa de panceta, huevo y parmesano', 750, 30, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1),
-('Alfajores de Maicena', 'Tiernos alfajores rellenos de dulce de leche y rebozados en coco', 380, 60, 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg', 1);
+('Milanesa Napolitana', 'Clásica milanesa de carne rebozada con salsa de tomate, jamón y mozzarella gratinada', 850, 45, 'https://images.pexels.com/photos/29042351/pexels-photo-29042351.jpeg', 1),
+('Arroz con Pollo', 'Arroz cremoso cocinado con trozos de pollo, morrón y caldo casero', 620, 50, 'https://images.pexels.com/photos/21821573/pexels-photo-21821573.jpeg', 1),
+('Fideos a la Bolognesa', 'Spaghetti con salsa bolognesa de carne picada y tomates frescos', 680, 40, 'https://images.pexels.com/photos/33428055/pexels-photo-33428055.jpeg', 1),
+('Locro', 'Guiso tradicional argentino con carne de cerdo, chorizo y porotos blancos', 920, 180, 'https://images.pexels.com/photos/13788766/pexels-photo-13788766.jpeg', 1),
+('Pollo al Horno con Papas', 'Muslos de pollo jugosos al horno con papas doradas y hierbas', 700, 75, 'https://images.pexels.com/photos/36939708/pexels-photo-36939708.jpeg', 1),
+('Osobuco al Vino Tinto', 'Osobuco braseado lentamente con vino tinto, cebolla y zanahorias', 780, 150, 'https://images.pexels.com/photos/19606035/pexels-photo-19606035.jpeg', 1),
+('Guiso de Lentejas', 'Guiso reconfortante de lentejas con chorizo, cebolla y pimentón', 540, 60, 'https://images.pexels.com/photos/33323278/pexels-photo-33323278.jpeg', 1),
+('Tortilla de Papa', 'Tortilla española con papas y cebolla, jugosa por dentro y dorada por fuera', 480, 35, 'https://images.pexels.com/photos/17714359/pexels-photo-17714359.jpeg', 1),
+('Pasta Carbonara', 'Penne con salsa cremosa de panceta, huevo y parmesano', 750, 30, 'https://images.pexels.com/photos/3606799/pexels-photo-3606799.jpeg', 1),
+('Alfajores de Maicena', 'Tiernos alfajores rellenos de dulce de leche y rebozados en coco', 380, 60, 'https://images.pexels.com/photos/17358380/pexels-photo-17358380.jpeg', 1);
 
 -- recipe_ingredients para Milanesa Napolitana (id = 1)
 INSERT INTO recipe_ingredients ("receta_id", "ingrediente_id", "cantidad") VALUES
