@@ -20,7 +20,7 @@ export class RecipeRepository {
     ) {}
 
     async save(dto: CreateRecipeDto, userId: number, calorias: number): Promise<Recipe> {
-        const receta = await this.repository.create({
+        const receta = this.repository.create({
             nombre: dto.nombre,
             descripcion: dto.descripcion,
             tiempoPreparacion: dto.tiempoPreparacion,
