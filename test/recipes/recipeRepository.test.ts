@@ -5,6 +5,7 @@ import { RecipeRepository } from "../../src/modules/recipes/repositories/recipe.
 import { Recipe } from "../../src/modules/recipes/entities/recipe.entity";
 import { CreateRecipeDto } from "../../src/modules/recipes/DTOs/createRecipe.dto";
 import { editRecipeDto } from "../../src/modules/recipes/DTOs/editRecipe.dto";
+import { Calendar } from "../../src/modules/calendar/entities/calendar.entity";
 
 const mockQueryBuilder = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
@@ -25,6 +26,15 @@ const mockRecipeOrmRepository = {
     createQueryBuilder: jest.fn(() => mockQueryBuilder),
 };
 
+const mockCalendarQueryBuilder = {
+    where: jest.fn().mockReturnThis(),
+    getCount: jest.fn().mockResolvedValue(0),
+};
+
+const mockCalendarRepository = {
+    createQueryBuilder: jest.fn(() => mockCalendarQueryBuilder),
+};
+
 describe('Recipe repository', () => {
     let repository: RecipeRepository;
 
@@ -33,6 +43,7 @@ describe('Recipe repository', () => {
             providers: [
                 RecipeRepository,
                 { provide: getRepositoryToken(Recipe), useValue: mockRecipeOrmRepository },
+                { provide: getRepositoryToken(Calendar), useValue: mockCalendarRepository },
             ],
         }).compile();
 
