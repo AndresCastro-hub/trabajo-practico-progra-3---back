@@ -365,16 +365,16 @@ UsersProvider ..> UsersRepository
 UsersRepository ..> User
 
 ' DTOs usuarios
-LoginDto ..> UserController
-RegisterResponseDto ..> UserController
-GetUsersDto ..> UserController
-RegisterResponseDto ..> UsersProvider
-RegisterDto ..> UsersProvider
-LoginDto ..> UsersProvider
-GetUsersDto ..> UsersProvider
-CreateUserDto ..> UsersRepository
-GetUsersDto ..> UsersRepository
-GetUsersDto *-- UserInfo
+'LoginDto ..> UserController
+'RegisterResponseDto ..> UserController
+'GetUsersDto ..> UserController
+'RegisterResponseDto ..> UsersProvider
+'RegisterDto ..> UsersProvider
+'LoginDto ..> UsersProvider
+'GetUsersDto ..> UsersProvider
+'CreateUserDto ..> UsersRepository
+'GetUsersDto ..> UsersRepository
+'GetUsersDto *-- UserInfo
 
 ' relaciones de Recetas
 Recipe *-- RecipeIngredient
@@ -389,37 +389,37 @@ RecipeIngredientRepository ..> Recipe
 RecipeRepository ..> IStorageService
 
 ' DTOs de recetas
-RecipeResponseDto ..> RecipesController
-CreateRecipeDto ..> RecipesController
-EditRecipeDto ..> RecipesController
-GetRecipeDto ..> RecipesController
-CreateRecipeDto *-- IngredientDto
-EditRecipeDto *-- IngredientDto
-GetRecipeDto *-- RecipeDto
-RecipeResponseDto *-- IngredientResponseDto
-RecipeResponseDto ..> RecipesService
-CreateRecipeDto ..> RecipesService
-EditRecipeDto ..> RecipesService
-GetRecipeDto ..> RecipesService
-GetRecipeIdDto ..> RecipesService
-IngredientDto ..> RecipeIngredientRepository
-EditRecipeDto ..> RecipeIngredientRepository
-CreateRecipeDto ..> RecipeRepository
-RecipeResponseDto ..> RecipeRepository
-GetRecipeDto ..> RecipeRepository
-GetRecipeIdDto ..> RecipeRepository
-EditRecipeDto ..> RecipeRepository
-GetRecipeIdDto *-- GetIngredientDto
+'RecipeResponseDto ..> RecipesController
+'CreateRecipeDto ..> RecipesController
+'EditRecipeDto ..> RecipesController
+'GetRecipeDto ..> RecipesController
+'CreateRecipeDto *-- IngredientDto
+'EditRecipeDto *-- IngredientDto
+'GetRecipeDto *-- RecipeDto
+'RecipeResponseDto *-- IngredientResponseDto
+'RecipeResponseDto ..> RecipesService
+'CreateRecipeDto ..> RecipesService
+'EditRecipeDto ..> RecipesService
+'GetRecipeDto ..> RecipesService
+'GetRecipeIdDto ..> RecipesService
+'IngredientDto ..> RecipeIngredientRepository
+'EditRecipeDto ..> RecipeIngredientRepository
+'CreateRecipeDto ..> RecipeRepository
+'RecipeResponseDto ..> RecipeRepository
+'GetRecipeDto ..> RecipeRepository
+'GetRecipeIdDto ..> RecipeRepository
+'EditRecipeDto ..> RecipeRepository
+'GetRecipeIdDto *-- GetIngredientDto
 
 ' Relaciones de ingredientes
 IngredientController ..> IngredientRepository
 IngredientRepository ..> Ingredient
 
 ' DTOs de ingredientes
-IngredientResponseDto ..> IngredientRepository
-IngredientResponseDto ..> IngredientController
-CreateIngredientDto ..> IngredientController
-CreateIngredientDto ..> IngredientRepository
+'IngredientResponseDto ..> IngredientRepository
+'IngredientResponseDto ..> IngredientController
+'CreateIngredientDto ..> IngredientController
+'CreateIngredientDto ..> IngredientRepository
 
 ' Relaciones de calendario
 CalendarController ..> CalendarService
@@ -433,15 +433,15 @@ Calendar *-- TipoComida
 Calendar *-- User
 
 ' DTOs de calendario
-calendarDto ..> CalendarController
-CalendarWeekQueryDto ..> CalendarController
-deleteCalendarDto ..> CalendarController
-calendarDto ..> CalendarService
-deleteCalendarDto ..> CalendarService
-CalendarWeekItemDto ..> CalendarWeekService
+'calendarDto ..> CalendarController
+'CalendarWeekQueryDto ..> CalendarController
+'deleteCalendarDto ..> CalendarController
+'calendarDto ..> CalendarService
+'deleteCalendarDto ..> CalendarService
+'CalendarWeekItemDto ..> CalendarWeekService
 
 ' Relaciones traductor y fatsecret
-IngredientTranslation ..> TranslationAdapter
-RecipesService ..> NutritionService
+IngredientTranslation .r.> TranslationAdapter
+RecipesService .l.> NutritionService
 NutritionService ..> ITranslation
 @enduml
