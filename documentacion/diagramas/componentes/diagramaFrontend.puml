@@ -1,0 +1,54 @@
+@startuml Diarama de Componentes Frontend
+package "Frontend" #c2ffcfe1 {
+    package "Pantalla Login" {
+        component Login
+        component Registro
+    }
+
+    package "Sidebar" {
+        component Navegacion_de_Pantallas
+    }
+
+    package "Usuario" {
+        package "Pantalla Recetario" {
+            component Grilla_Recetas
+            component Recetas
+
+            Grilla_Recetas --> Recetas : "Contiene"
+        }
+
+        component Pantalla_Detalle_Receta
+
+        component Pantalla_Nueva_Receta
+
+        component Pantalla_Editar_Receta
+
+        package "Pantalla Calendario" {
+            component Semana
+            component Dias
+
+            Semana --> Dias : "Contiene"
+            Dias ..> Asignar_Receta : "Permite"
+            Dias ..> Editar_Asignacion : "Permite"
+            Dias ..> Eliminar_Receta : "Permite"
+        }
+
+        package "Administrador" {
+        component Tabla_RecetasPlataforma
+        component Tabla_Usuarios
+        component Tabla_Ingredientes
+
+        Tabla_Ingredientes --> Nuevo_Ingrediente : "Permite"
+        
+    }
+
+        Recetas --> Pantalla_Detalle_Receta : "Navega a"
+        Pantalla_Detalle_Receta --> Pantalla_Editar_Receta : "Navega a"
+        Recetas --> Pantalla_Nueva_Receta : "Navega a"
+
+        Tabla_RecetasPlataforma ---> Pantalla_Editar_Receta : "Navega a"
+        Tabla_RecetasPlataforma ---> Pantalla_Nueva_Receta : "Navega a"
+    }
+}
+
+@enduml

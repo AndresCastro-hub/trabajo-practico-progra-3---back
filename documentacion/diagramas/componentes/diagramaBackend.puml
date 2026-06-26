@@ -1,0 +1,38 @@
+@startuml Diagrama de Componentes Backend
+
+package "Backend" #a0d8f8e1 {
+    component Modulo_Auth
+    component Modulo_Calendario
+    component Modulo_Servicio_Traduccion
+    component Modulo_Ingredientes
+    component Modulo_Usuarios
+    component Modulo_Recetas
+
+    ' --- RELACIONES ---
+
+    Modulo_Ingredientes <<.. Modulo_Recetas : "Obtiene"
+
+    Modulo_Calendario -->> Modulo_Recetas : "Tiene"
+    Modulo_Servicio_Traduccion <<.. Modulo_Recetas : "Obtiene Traducciones"
+
+    Modulo_Usuarios <<. Modulo_Auth: "Autentica"
+    Modulo_Usuarios <<-- Modulo_Calendario : "Tiene"
+
+    Modulo_Auth -- rol : "Ofrece Rol de Usuario"
+    Modulo_Calendario - rol
+    rol -- Modulo_Recetas
+    rol - Modulo_Ingredientes
+}
+
+cloud {
+    component Servicio_Banco_Imagenes as SBI
+}
+
+cloud {
+    component Servicio_Calorias as SC
+}
+
+Modulo_Recetas ..>> SBI : "Guarda Imagenes"
+Modulo_Recetas ..>> SC : "Obtiene calorias"
+
+@enduml

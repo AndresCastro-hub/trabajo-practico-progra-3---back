@@ -1,0 +1,12 @@
+@startuml Diarama de Componentes Base de datos
+package "Base de Datos" {
+    component Recetas
+    component Calendario
+    component Usuario
+    component Roles
+    component Lista_Ingrediente
+    component Ingredientes
+    component Tipo_Comida
+    component Ingredientes_Traduccion
+}
+@enduml

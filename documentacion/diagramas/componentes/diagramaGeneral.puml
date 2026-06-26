@@ -1,0 +1,13 @@
+@startuml Diarama de Componentes General
+
+component Base_de_Datos #f8e8a0e1
+
+component Frontend #c2ffcfe1
+
+component Backend #a0d8f8e1
+
+internet -->> Frontend
+Frontend -->> Backend
+Backend -->> Base_de_Datos
+
+@enduml
